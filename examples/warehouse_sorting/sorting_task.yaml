@@ -1,0 +1,36 @@
+goals:
+  - name: "Sort Red Boxes"
+    description: "Move all red boxes to Zone A."
+    target_color: "red"
+    target_zone: "Zone A"
+    count: 5
+    actions:
+      - action: "move"
+        parameters:
+          from: "current_position"
+          to: "Zone A"
+      - action: "pick"
+        parameters:
+          object: "red box"
+      - action: "place"
+        parameters:
+          object: "red box"
+          location: "Zone A"
+
+  - name: "Sort Blue Boxes"
+    description: "Move all blue boxes to Zone B."
+    target_color: "blue"
+    target_zone: "Zone B"
+    count: 3
+    actions:
+      - action: "move"
+        parameters:
+          from: "current_position"
+          to: "Zone B"
+      - action: "pick"
+        parameters:
+          object: "blue box"
+      - action: "place"
+        parameters:
+          object: "blue box"
+          location: "Zone B"

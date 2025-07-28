@@ -1,0 +1,60 @@
+2025-06-11 23:55:25,898 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/simple_reach/scene_panda_reach_target.ttt (headless=False)
+2025-06-11 23:55:34,252 - load_environment_logger - INFO - Simulation started. CoppeliaSim should be open with the environment.
+2025-06-11 23:58:10,908 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/simple_reach/scene_panda_reach_target.ttt (headless=False)
+2025-06-11 23:58:17,158 - load_environment_logger - INFO - Simulation started. CoppeliaSim should be open with the environment.
+2025-06-13 10:38:39,327 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/simple_reach/scene_panda_reach_target.ttt (headless=False)
+2025-06-13 10:38:46,264 - load_environment_logger - INFO - Simulation started. CoppeliaSim should be open with the environment.
+2025-06-13 10:39:56,254 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/scenes/casita.fbx (headless=False)
+2025-06-13 10:40:01,914 - load_environment_logger - INFO - Launched empty scene. Attempting to import: examples/scenes/casita.fbx
+2025-06-13 10:40:01,914 - load_environment_logger - ERROR - An unexpected error occurred: 'PyRep' object has no attribute 'import_scene'
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/src/scripts/load_environment.py", line 44, in load_environment
+    pr.import_scene(scene_filepath)
+AttributeError: 'PyRep' object has no attribute 'import_scene'
+2025-06-13 10:40:06,682 - load_environment_logger - INFO - PyRep connection closed.
+2025-06-13 10:43:16,205 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/scenes/casita.fbx (headless=False)
+2025-06-13 10:43:20,851 - load_environment_logger - INFO - Launched empty scene. Attempting to import: examples/scenes/casita.fbx
+2025-06-13 10:43:20,852 - load_environment_logger - ERROR - Runtime error during CoppeliaSim launch or scene load: The call failed on the V-REP side. Return value: -1
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/src/scripts/load_environment.py", line 44, in load_environment
+    pr.import_model(scene_filepath)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/pyrep.py", line 282, in import_model
+    handle = sim.simLoadModel(filename)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 345, in simLoadModel
+    _check_return(val)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 27, in _check_return
+    raise RuntimeError(
+RuntimeError: The call failed on the V-REP side. Return value: -1
+2025-06-13 10:43:25,640 - load_environment_logger - INFO - PyRep connection closed.
+2025-06-13 10:43:43,535 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/scenes/casitaobj.obj (headless=False)
+2025-06-13 10:43:48,381 - load_environment_logger - INFO - Launched empty scene. Attempting to import: examples/scenes/casitaobj.obj
+2025-06-13 10:43:48,382 - load_environment_logger - ERROR - Runtime error during CoppeliaSim launch or scene load: The call failed on the V-REP side. Return value: -1
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/src/scripts/load_environment.py", line 44, in load_environment
+    pr.import_model(scene_filepath)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/pyrep.py", line 282, in import_model
+    handle = sim.simLoadModel(filename)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 345, in simLoadModel
+    _check_return(val)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 27, in _check_return
+    raise RuntimeError(
+RuntimeError: The call failed on the V-REP side. Return value: -1
+2025-06-13 10:43:53,133 - load_environment_logger - INFO - PyRep connection closed.
+2025-06-13 10:48:10,180 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: /home/josecarrillouru/Framework/examples/scenes/casita.fbx (headless=False)
+2025-06-13 10:48:14,960 - load_environment_logger - INFO - Launched empty scene. Attempting to import: /home/josecarrillouru/Framework/examples/scenes/casita.fbx
+2025-06-13 10:48:14,962 - load_environment_logger - ERROR - Runtime error during CoppeliaSim launch or scene load: The call failed on the V-REP side. Return value: -1
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/src/scripts/load_environment.py", line 45, in load_environment
+    pr.import_model(absolute_scene_filepath)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/pyrep.py", line 282, in import_model
+    handle = sim.simLoadModel(filename)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 345, in simLoadModel
+    _check_return(val)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 27, in _check_return
+    raise RuntimeError(
+RuntimeError: The call failed on the V-REP side. Return value: -1
+2025-06-13 10:48:19,709 - load_environment_logger - INFO - PyRep connection closed.
+2025-07-23 17:24:00,129 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/robot_navigation/ProjectorMove.ttt (headless=False)
+2025-07-23 17:24:06,096 - load_environment_logger - INFO - Simulation started. CoppeliaSim should be open with the environment.
+2025-07-27 17:21:53,785 - load_environment_logger - INFO - Attempting to launch CoppeliaSim with scene: examples/robot_navigation/Navigation.ttt (headless=False)
+2025-07-27 17:21:59,821 - load_environment_logger - INFO - Simulation started. CoppeliaSim should be open with the environment.

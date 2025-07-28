@@ -1,0 +1,12 @@
+PyRep
+ray[rllib]
+torch
+gym
+numpy
+pyyaml
+opencv-python-headless
+matplotlib
+imageio
+tqdm
+onnx
+onnxruntime

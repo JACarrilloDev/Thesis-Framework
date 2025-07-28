@@ -1,0 +1,28 @@
+task_name: "Move Projector with Asti"
+description: "Asti robot picks up a projector and moves it to a target table using DRL."
+
+# CoppeliaSim scene file to be used for this task
+scene_file: "examples/scenes/scene_reinforcement_learning_env.ttt" # Your scene
+
+robots_setup:
+  - name: "Asti"             # Instance name for the robot in the simulation
+    type: "Asti_Default"       # Matches a key in robot_definitions.py
+    initial_pose: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0] # x,y,z, roll,pitch,yaw (adjust as needed)
+
+environment_objects:
+  - name: "ProjectorObject"      # Name of the projector object in your CoppeliaSim scene
+    type: "dynamic_prop"
+    initial_pose: [1.0, 1.0, 0.5, 0, 0, 0] # Example initial pose (adjust)
+  - name: "TargetPoseProjector" # Name of the Dummy object marking the target
+    type: "static_target_pose"
+    # Its pose is defined in the CoppeliaSim scene itself.
+
+# For DRL, the 'goals' section is less about sequential actions and more about defining
+# the overall objective for the reward function.
+# This section might be used by RobotEnv to understand the primary objective.
+learning_objective:
+  type: "pick_and_place"
+  object_to_manipulate: "ProjectorObject"
+  target_pose_object: "TargetPoseProjector"
+  success_threshold_distance: 0.05 # meters
+  success_threshold_angle: 0.1   # radians (approx 5.7 degrees)
