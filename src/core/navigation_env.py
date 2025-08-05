@@ -46,17 +46,42 @@ class NavigationEnv(gym.Env):
         self.success_dist = task_config['learning_objective']['success_threshold_distance']
 
     def reset(self, *, seed=None, options=None):
+        """Add more stability to reset"""
         self.current_step = 0
         self.stuck_steps = 0
         self._prev_dist = None
-        self.sim.reset()
-        self.sim.start()
-        for _ in range(5):  # Multiple steps to ensure stability
-            self.sim.step()
-        time.sleep(0.1)  # Reduced sleep time since we're using multiple steps
-        obs = self._get_obs()
-        info = {}
-        return obs, info
+        
+        # More careful reset sequence
+        try:
+            self.sim.reset()
+            self.sim.start()
+            # Allow more time for physics to settle
+            for _ in range(10):  # Increased from 5
+                self.sim.step()
+                time.sleep(0.02)  # Small sleep between steps
+                
+            # Verify poses are valid after reset
+            robot_pose = self.robot.get_robot_base_pose()
+            target_pose = self.robot.get_object_pose(self.target_name)
+            
+            if robot_pose is None or target_pose is None:
+                print("WARNING: Invalid poses after reset, retrying...")
+                return self.reset(seed=seed, options=options)
+                
+            obs = self._get_obs()
+            if np.any(np.isnan(obs)):
+                print("WARNING: NaN in observation after reset, retrying...")
+                return self.reset(seed=seed, options=options)
+                
+            # Calculate initial distance for debugging
+            dist = np.linalg.norm(np.array(robot_pose[:2]) - np.array(target_pose[:2]))
+            print(f"Initial distance after reset: {dist:.3f}m")
+            
+            return obs, {}
+            
+        except Exception as e:
+            print(f"Error during reset: {e}")
+            return self.reset(seed=seed, options=options)
 
     def step(self, action):
         self.current_step += 1
@@ -106,7 +131,12 @@ class NavigationEnv(gym.Env):
         else:
             img_flat = np.zeros(np.prod(self.img_shape), dtype=np.float32)
         obs = np.concatenate([robot_pose[:2], target_pose[:2], prox, img_flat])
-        return obs
+        
+        if np.any(np.isnan(obs)):
+            print(f"WARNING: NaN in observation at step {self.current_step}")
+            obs = np.nan_to_num(obs, 0.0)
+    
+        return obs.astype(np.float32)
 
     def _compute_reward(self, obs):
         robot_xy = obs[:2]
@@ -115,64 +145,61 @@ class NavigationEnv(gym.Env):
         prox = obs[4:4+self.num_prox]
         reward = 0.0
 
-        # Progress reward: encourage getting closer to the goal
+        # Progress reward with clipping
         if hasattr(self, '_prev_dist') and self._prev_dist is not None:
             delta_dist = self._prev_dist - dist
-            reward += delta_dist * 15.0 # Tuned for stability
+            reward += delta_dist * 10.0
 
-            # Stuck detection
+            # Stuck detection with clipped penalty
             if abs(delta_dist) < self.stuck_delta:
                 self.stuck_steps += 1
             else:
                 self.stuck_steps = 0
 
             if self.stuck_steps >= self.stuck_threshold:
-                reward -= 20.0
-                print(f"Stuck penalty at step {self.current_step} (no progress for {self.stuck_steps} steps)")
+                reward -= 10.0
+                print(f"Stuck penalty at step {self.current_step}")
                 self.stuck_steps = 0
         else:
             self.stuck_steps = 0
 
         self._prev_dist = dist
 
-        # Small step penalty to encourage efficiency
-        reward -= 0.01
+        # Small step penalty
+        reward -= 0.015
 
-        # Encourage moving forward, penalize moving backward
+        # Movement rewards with clipping
         if hasattr(self.robot, "get_base_velocities"):
             vx = self.robot.get_base_velocities()[0]
-            # If sensor4 (index 3) is close to an obstacle, penalize forward motion
-            if prox[3] < 0.2 and vx > 0.12:
-                reward -= 1.5 * vx  # Penalize trying to go forward into a wall
-            elif vx > 0.10:
-                reward += 0.75 * vx  # Small bonus for forward motion
-            elif vx < -0.15:
-                reward -= 2.0 * abs(vx)  # Penalize backward motion
-                # print(f"Backward penalty at step {self.current_step} (vx={vx:.2f})")
+            if prox[3] < 0.2 and vx > 0.12:  # If facing wall
+                reward -= 2.0 * vx  # Wall collision penalty
+            elif vx > 0.10:  # Moving forward
+                reward += 1.0 * vx  # Forward bonus
+            elif vx < -0.15:  # Moving backward
+                reward -= 1.5 * abs(vx)  # Backward penalty
 
-        # Alignment reward: encourage facing the target
-        robot_pose = self.robot.get_robot_base_pose()  # [x, y, z, roll, pitch, yaw]
+        # Alignment reward (already naturally clipped between 0 and 1)
+        robot_pose = self.robot.get_robot_base_pose()
         robot_yaw = robot_pose[5]
         to_target = target_xy - robot_xy
         target_angle = np.arctan2(to_target[1], to_target[0])
-        angle_diff = np.arctan2(np.sin(target_angle - robot_yaw), np.cos(target_angle - robot_yaw))  # [-pi, pi]
-        alignment_reward = 1.0 - (abs(angle_diff) / np.pi)  # 1 when aligned, 0 when opposite
-        reward += 0.07 * alignment_reward  # Small bonus for facing the target
+        angle_diff = np.arctan2(np.sin(target_angle - robot_yaw), np.cos(target_angle - robot_yaw))
+        alignment_reward = 1.0 - (abs(angle_diff) / np.pi)
+        reward += 0.25 * alignment_reward  # Smaller alignment bonus
 
-        # If facing a wall, encourage turning toward the target
+        # Extra turning encouragement when facing wall
         if prox[3] < 0.2 and abs(angle_diff) > 0.3:
-            reward += 0.5 * alignment_reward  # Extra encouragement to turn toward target
+            reward += alignment_reward
 
-        # Proximity penalty: only penalize for being very close to obstacles
+        # Proximity penalty with clipping
         very_close_threshold = 0.15
         proximity_penalty = np.sum(prox < very_close_threshold)
         if proximity_penalty > 0:
-            reward -= proximity_penalty * 3.0  # Strong penalty for being too close
-            # print(f"Proximity penalty at step {self.current_step} (close sensors: {proximity_penalty})")
+            reward -= 2.0 * proximity_penalty  # Proximity penalty
 
-        # Success bonus
+        # Success bonus (keep significant but not extreme)
         if dist < self.success_dist:
-            reward += 100.0
+            reward += 80.0  # Reduced success bonus
             print(f"Goal reached at step {self.current_step}!")
 
         return reward, dist < self.success_dist

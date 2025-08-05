@@ -3109,3 +3109,1888 @@ In tower 0 on device cpu
 2025-07-27 02:37:48,763 - nav_rl_main - INFO - Iteration 4/200: None
 2025-07-27 03:19:51,175 - nav_rl_main - INFO - Iteration 5/200: None
 2025-07-27 03:28:23,248 - nav_rl_main - INFO - Script finished.
+2025-07-28 22:07:41,715 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-28 22:08:10,299 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-28 22:08:10,485 - nav_rl_main - INFO - Starting DRL navigation training for 500 iterations...
+2025-07-28 22:53:05,616 - nav_rl_main - INFO - Iteration 1/500: None
+2025-07-28 23:38:22,062 - nav_rl_main - INFO - Iteration 2/500: None
+2025-07-29 00:22:17,168 - nav_rl_main - INFO - Iteration 3/500: None
+2025-07-29 01:06:24,285 - nav_rl_main - INFO - Iteration 4/500: None
+2025-07-29 01:51:03,328 - nav_rl_main - INFO - Iteration 5/500: None
+2025-07-29 02:18:28,460 - nav_rl_main - INFO - Script finished.
+2025-07-29 02:41:16,566 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 02:41:47,778 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-29 02:41:47,986 - nav_rl_main - INFO - Starting DRL navigation training for 500 iterations...
+2025-07-29 03:11:31,544 - nav_rl_main - INFO - Script finished.
+2025-07-29 10:40:49,171 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 10:41:20,704 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-29 10:41:21,618 - nav_rl_main - INFO - Starting DRL navigation training for 500 iterations...
+2025-07-29 11:14:30,175 - nav_rl_main - ERROR - An error occurred during the RL process: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+Traceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 66, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 64, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 334, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 520, in _training_step_old_and_hybrid_api_stacks
+    train_results = multi_gpu_train_one_step(self, train_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/train_ops.py", line 176, in multi_gpu_train_one_step
+    results = policy.learn_on_loaded_batch(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 831, in learn_on_loaded_batch
+    return self.learn_on_batch(batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 712, in learn_on_batch
+    grads, fetches = self.compute_gradients(postprocessed_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 924, in compute_gradients
+    tower_outputs = self._multi_gpu_parallel_grad_calc([postprocessed_batch])
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1421, in _multi_gpu_parallel_grad_calc
+    raise last_result[0] from last_result[1]
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+2025-07-29 11:14:30,184 - nav_rl_main - INFO - Script finished.
+2025-07-29 11:42:45,397 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 11:56:10,560 - nav_rl_main - ERROR - An error occurred during the RL process: local variable 'robot_pose' referenced before assignment
+Traceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 159, in __init__
+    self._setup(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 229, in _setup
+    self.add_workers(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 682, in add_workers
+    raise result.get()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 497, in _fetch_result
+    result = ray.get(r)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 2667, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 866, in get_objects
+    raise value
+ray.exceptions.RayActorError: The actor died because of an error raised in its creation task, [36mray::RolloutWorker.__init__()[39m (pid=4474, ip=172.19.255.244, actor_id=6f5fe57c089b4120a01f747201000000, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x7f3cf1235370>)
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 57, in reset
+    obs = self._get_obs()
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 95, in _get_obs
+    robot_xy = robot_pose[:2] / 40.0
+UnboundLocalError: local variable 'robot_pose' referenced before assignment
+
+During handling of the above exception, another exception occurred:
+
+[36mray::RolloutWorker.__init__()[39m (pid=4474, ip=172.19.255.244, actor_id=6f5fe57c089b4120a01f747201000000, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x7f3cf1235370>)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 407, in __init__
+    self.env = env_creator(copy.deepcopy(self.env_context))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/env/utils/__init__.py", line 158, in _gym_env_creator
+    obs_and_infos = env.reset(seed=None, options={})
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/gymnasium/wrappers/compatibility.py", line 100, in reset
+    return self.env.reset(), {}
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 57, in reset
+    obs = self._get_obs()
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 95, in _get_obs
+    robot_xy = robot_pose[:2] / 40.0
+UnboundLocalError: local variable 'robot_pose' referenced before assignment
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 58, in main
+    trainer = RLTrainer(env_class=NavigationEnv, env_config=env_config)
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 61, in __init__
+    self.trainer = PPOTrainer(config=self.config)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 533, in __init__
+    super().__init__(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 161, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 631, in setup
+    self.workers = WorkerSet(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 181, in __init__
+    raise e.args[0].args[2]
+UnboundLocalError: local variable 'robot_pose' referenced before assignment
+2025-07-29 11:56:10,569 - nav_rl_main - INFO - Script finished.
+2025-07-29 11:57:00,457 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 11:57:21,036 - nav_rl_main - ERROR - An error occurred during the RL process: local variable 'robot_pose' referenced before assignment
+Traceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 159, in __init__
+    self._setup(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 229, in _setup
+    self.add_workers(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 682, in add_workers
+    raise result.get()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 497, in _fetch_result
+    result = ray.get(r)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 2667, in get
+    values, debugger_breakpoint = worker.get_objects(object_refs, timeout=timeout)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 866, in get_objects
+    raise value
+ray.exceptions.RayActorError: The actor died because of an error raised in its creation task, [36mray::RolloutWorker.__init__()[39m (pid=7503, ip=172.19.255.244, actor_id=d6f8fadd7814dab64934406201000000, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x7fbedf668430>)
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 57, in reset
+    obs = self._get_obs()
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 95, in _get_obs
+    robot_xy = robot_pose[:2] / 40.0
+UnboundLocalError: local variable 'robot_pose' referenced before assignment
+
+During handling of the above exception, another exception occurred:
+
+[36mray::RolloutWorker.__init__()[39m (pid=7503, ip=172.19.255.244, actor_id=d6f8fadd7814dab64934406201000000, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x7fbedf668430>)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 407, in __init__
+    self.env = env_creator(copy.deepcopy(self.env_context))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/env/utils/__init__.py", line 158, in _gym_env_creator
+    obs_and_infos = env.reset(seed=None, options={})
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/gymnasium/wrappers/compatibility.py", line 100, in reset
+    return self.env.reset(), {}
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 57, in reset
+    obs = self._get_obs()
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 95, in _get_obs
+    robot_xy = robot_pose[:2] / 40.0
+UnboundLocalError: local variable 'robot_pose' referenced before assignment
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 58, in main
+    trainer = RLTrainer(env_class=NavigationEnv, env_config=env_config)
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 61, in __init__
+    self.trainer = PPOTrainer(config=self.config)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 533, in __init__
+    super().__init__(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 161, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 631, in setup
+    self.workers = WorkerSet(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 181, in __init__
+    raise e.args[0].args[2]
+UnboundLocalError: local variable 'robot_pose' referenced before assignment
+2025-07-29 11:57:21,038 - nav_rl_main - INFO - Script finished.
+2025-07-29 11:57:44,874 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 11:58:08,536 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-29 11:58:08,774 - nav_rl_main - INFO - Starting DRL navigation training for 500 iterations...
+2025-07-29 12:16:15,986 - nav_rl_main - ERROR - An error occurred during the RL process: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+Traceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 66, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 68, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 334, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 520, in _training_step_old_and_hybrid_api_stacks
+    train_results = multi_gpu_train_one_step(self, train_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/train_ops.py", line 176, in multi_gpu_train_one_step
+    results = policy.learn_on_loaded_batch(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 831, in learn_on_loaded_batch
+    return self.learn_on_batch(batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 712, in learn_on_batch
+    grads, fetches = self.compute_gradients(postprocessed_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 924, in compute_gradients
+    tower_outputs = self._multi_gpu_parallel_grad_calc([postprocessed_batch])
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1421, in _multi_gpu_parallel_grad_calc
+    raise last_result[0] from last_result[1]
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+2025-07-29 12:16:15,991 - nav_rl_main - INFO - Script finished.
+2025-07-29 17:42:27,220 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 17:42:40,656 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-29 17:42:46,520 - nav_rl_main - INFO - Starting DRL navigation training for 500 iterations...
+2025-07-29 17:43:47,677 - nav_rl_main - ERROR - An error occurred during the RL process: The call failed on the V-REP side. Return value: -1
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 66, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 69, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 334, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 495, in _training_step_old_and_hybrid_api_stacks
+    train_batch = synchronous_parallel_sample(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 85, in synchronous_parallel_sample
+    sampled_data = [worker_set.local_worker().sample()]
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 713, in sample
+    batch = self.input_reader.next()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 91, in next
+    batches = [self.get_data()]
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/sampler.py", line 273, in get_data
+    item = next(self._env_runner)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/env_runner_v2.py", line 348, in run
+    outputs = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/env_runner_v2.py", line 374, in step
+    active_envs, to_eval, outputs = self._process_observations(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/env_runner_v2.py", line 692, in _process_observations
+    self._handle_done_episode(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/env_runner_v2.py", line 860, in _handle_done_episode
+    resetted_obs, resetted_infos = self._base_env.try_reset(env_id)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/env/vector_env.py", line 474, in try_reset
+    obs, infos = self.vector_env.reset_at(env_id, seed=seed, options=options)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/env/vector_env.py", line 309, in reset_at
+    raise e
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/env/vector_env.py", line 301, in reset_at
+    obs_and_infos = self.envs[index].reset(seed=seed, options=options)
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 57, in reset
+    obs = self._get_obs()
+  File "/home/josecarrillouru/Framework/src/core/navigation_env.py", line 95, in _get_obs
+    robot_pose = self.robot.get_robot_base_pose()
+  File "/home/josecarrillouru/Framework/src/core/robot_controller.py", line 198, in get_robot_base_pose
+    return self.robot_model_handle.get_pose().tolist()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/objects/object.py", line 256, in get_pose
+    quaternion = self.get_quaternion(relative_to)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/objects/object.py", line 218, in get_quaternion
+    quaternion = sim.simGetObjectQuaternion(self._handle, relto)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 397, in simGetObjectQuaternion
+    _check_return(ret)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/pyrep/backend/sim.py", line 27, in _check_return
+    raise RuntimeError(
+RuntimeError: The call failed on the V-REP side. Return value: -1
+2025-07-29 17:43:47,703 - nav_rl_main - INFO - Script finished.
+2025-07-29 17:47:21,898 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 17:47:50,838 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-29 17:47:51,996 - nav_rl_main - INFO - Starting DRL navigation training for 500 iterations...
+2025-07-29 17:53:47,050 - nav_rl_main - ERROR - An error occurred during the RL process: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+Traceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 66, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 69, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 334, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 520, in _training_step_old_and_hybrid_api_stacks
+    train_results = multi_gpu_train_one_step(self, train_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/train_ops.py", line 176, in multi_gpu_train_one_step
+    results = policy.learn_on_loaded_batch(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 831, in learn_on_loaded_batch
+    return self.learn_on_batch(batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 712, in learn_on_batch
+    grads, fetches = self.compute_gradients(postprocessed_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 924, in compute_gradients
+    tower_outputs = self._multi_gpu_parallel_grad_calc([postprocessed_batch])
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1421, in _multi_gpu_parallel_grad_calc
+    raise last_result[0] from last_result[1]
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+2025-07-29 17:53:47,067 - nav_rl_main - INFO - Script finished.
+2025-07-29 18:03:19,314 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 18:03:40,892 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-29 18:03:41,275 - nav_rl_main - INFO - Starting DRL navigation training for 100 iterations...
+2025-07-29 18:12:03,915 - nav_rl_main - ERROR - An error occurred during the RL process: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+Traceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 66, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 69, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 334, in train
+    raise skipped from exception_cause(skipped)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 520, in _training_step_old_and_hybrid_api_stacks
+    train_results = multi_gpu_train_one_step(self, train_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/train_ops.py", line 176, in multi_gpu_train_one_step
+    results = policy.learn_on_loaded_batch(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 831, in learn_on_loaded_batch
+    return self.learn_on_batch(batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 712, in learn_on_batch
+    grads, fetches = self.compute_gradients(postprocessed_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/threading.py", line 24, in wrapper
+    return func(self, *a, **k)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 924, in compute_gradients
+    tower_outputs = self._multi_gpu_parallel_grad_calc([postprocessed_batch])
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1421, in _multi_gpu_parallel_grad_calc
+    raise last_result[0] from last_result[1]
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+ tracebackTraceback (most recent call last):
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/policy/torch_policy_v2.py", line 1336, in _worker
+    self.loss(model, self.dist_class, sample_batch)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo_torch_policy.py", line 85, in loss
+    curr_action_dist = dist_class(logits, model)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/models/torch/torch_action_dist.py", line 250, in __init__
+    self.dist = torch.distributions.normal.Normal(mean, torch.exp(log_std))
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/normal.py", line 57, in __init__
+    super().__init__(batch_shape, validate_args=validate_args)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/torch/distributions/distribution.py", line 70, in __init__
+    raise ValueError(
+ValueError: Expected parameter loc (Tensor of shape (64, 3)) of distribution Normal(loc: torch.Size([64, 3]), scale: torch.Size([64, 3])) to satisfy the constraint Real(), but found invalid values:
+tensor([[nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan],
+        [nan, nan, nan]], grad_fn=<SplitBackward0>)
+
+In tower 0 on device cpu
+2025-07-29 18:12:03,920 - nav_rl_main - INFO - Script finished.
+2025-07-29 19:17:14,678 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-29 19:17:37,116 - nav_rl_main - INFO - Starting DRL navigation training for 300 iterations...
+2025-07-30 01:27:46,165 - nav_rl_main - INFO - Iteration 1/300: None
+2025-07-30 02:21:32,151 - nav_rl_main - INFO - Script finished.
+2025-07-31 10:22:08,626 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-31 10:22:45,945 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-31 10:22:46,117 - nav_rl_main - INFO - Starting DRL navigation training for 100 iterations...
+2025-07-31 10:27:20,285 - nav_rl_main - INFO - Training interrupted by user.
+2025-07-31 10:27:20,286 - nav_rl_main - ERROR - An error occurred during the RL process: 'RLTrainer' object has no attribute 'save_checkpoint'
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 98, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 70, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 495, in _training_step_old_and_hybrid_api_stacks
+    train_batch = synchronous_parallel_sample(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 88, in synchronous_parallel_sample
+    sampled_data = worker_set.foreach_worker(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 762, in foreach_worker
+    remote_results = self.__worker_manager.foreach_actor(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 609, in foreach_actor
+    _, remote_results = self._fetch_result(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 476, in _fetch_result
+    ready, _ = ray.wait(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 2898, in wait
+    ready_ids, remaining_ids = worker.core_worker.wait(
+  File "python/ray/_raylet.pyx", line 3783, in ray._raylet.CoreWorker.wait
+  File "python/ray/_raylet.pyx", line 570, in ray._raylet.check_status
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 122, in main
+    emergency_checkpoint = trainer.save_checkpoint()
+AttributeError: 'RLTrainer' object has no attribute 'save_checkpoint'
+2025-07-31 10:27:20,310 - nav_rl_main - INFO - Script finished.
+2025-07-31 12:28:28,792 - nav_rl_main - INFO - Initializing Simulation...
+2025-07-31 12:28:59,862 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-07-31 12:29:00,087 - nav_rl_main - INFO - Starting DRL navigation training for 300 iterations...
+2025-07-31 12:35:58,733 - nav_rl_main - INFO - Training interrupted by user.
+2025-07-31 12:35:58,734 - nav_rl_main - ERROR - An error occurred during the RL process: 'RLTrainer' object has no attribute 'save_checkpoint'
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 98, in main
+    result = trainer.train()
+  File "/home/josecarrillouru/Framework/src/core/reinforcement_learning.py", line 70, in train
+    result = self.trainer.train()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 331, in train
+    result = self.step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 849, in step
+    results, train_iter_ctx = self._run_one_training_iteration()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 3194, in _run_one_training_iteration
+    results = self.training_step()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 410, in training_step
+    return self._training_step_old_and_hybrid_api_stacks()
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/algorithms/ppo/ppo.py", line 495, in _training_step_old_and_hybrid_api_stacks
+    train_batch = synchronous_parallel_sample(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/execution/rollout_ops.py", line 88, in synchronous_parallel_sample
+    sampled_data = worker_set.foreach_worker(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 762, in foreach_worker
+    remote_results = self.__worker_manager.foreach_actor(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 609, in foreach_actor
+    _, remote_results = self._fetch_result(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/rllib/utils/actor_manager.py", line 476, in _fetch_result
+    ready, _ = ray.wait(
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/auto_init_hook.py", line 21, in auto_init_wrapper
+    return fn(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/client_mode_hook.py", line 103, in wrapper
+    return func(*args, **kwargs)
+  File "/home/josecarrillouru/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 2898, in wait
+    ready_ids, remaining_ids = worker.core_worker.wait(
+  File "python/ray/_raylet.pyx", line 3783, in ray._raylet.CoreWorker.wait
+  File "python/ray/_raylet.pyx", line 570, in ray._raylet.check_status
+KeyboardInterrupt
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 122, in main
+    emergency_checkpoint = trainer.save_checkpoint()
+AttributeError: 'RLTrainer' object has no attribute 'save_checkpoint'
+2025-07-31 12:35:58,761 - nav_rl_main - INFO - Script finished.
+2025-08-04 19:00:25,296 - nav_rl_main - INFO - Initializing Simulation...
+2025-08-04 19:01:01,177 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
+2025-08-04 19:01:01,331 - nav_rl_main - INFO - Starting DRL navigation training for 300 iterations...

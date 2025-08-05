@@ -31,7 +31,7 @@ class RLTrainer:
             .rollouts(
                 num_rollout_workers=1,
                 num_envs_per_worker=1,
-                rollout_fragment_length=100,  # Shorter fragments for faster updates
+                rollout_fragment_length=200,  # Shorter fragments for faster updates
                 batch_mode="complete_episodes"
             )
             .training(
@@ -41,22 +41,28 @@ class RLTrainer:
                     #     [32, [4, 4], 2],
                     #     [64, [3, 3], 1],
                     # ],
-                    "fcnet_hiddens": [128, 128],  # Smaller, faster network
+                    "fcnet_hiddens": [128, 128],
                     "fcnet_activation": "tanh",
+                    "vf_share_layers": False,
                 },
-                lr=1e-4,  # Slightly higher learning rate for faster adaptation
-                gamma=0.995,
-                entropy_coeff=0.03,  # Encourage exploration
-                sgd_minibatch_size=64,
-                num_sgd_iter=5,
-                train_batch_size=500,  # Smaller batch for quicker updates
-                lr_schedule=[[0, 1e-4], [500000, 5e-5]],
-            )
+            lr=5e-5,  # Slightly higher learning rate
+            gamma=0.99,
+            entropy_coeff=0.02,
+            clip_param=0.2,
+            vf_clip_param=1.0,  # Reduced from 10.0
+            grad_clip=1.0,
+            sgd_minibatch_size=64,
+            num_sgd_iter=4,
+            train_batch_size=1000,  # Increased slightly
+            lambda_=0.95,
+            # lr_schedule=[[0, 1e-4], [1000000, 5e-5]]  # Learning rate decay
+        )
             .resources(num_cpus_per_worker=1,num_gpus=0)
         )
         self.trainer = PPOTrainer(config=self.config)
 
-    def train(self, iterations=100, checkpoint_every=10):
+    def train(self, iterations=300, checkpoint_every=10):
+        """Train with consistent checkpointing"""
         log = self.logger
         log.info(f"Starting RL training for {iterations} iterations at {datetime.now().isoformat()}")
         iter_range = trange(iterations, desc="Training iterations") if USE_TQDM else range(iterations)
