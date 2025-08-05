@@ -4994,3 +4994,9 @@ AttributeError: 'RLTrainer' object has no attribute 'save_checkpoint'
 2025-08-04 19:00:25,296 - nav_rl_main - INFO - Initializing Simulation...
 2025-08-04 19:01:01,177 - nav_rl_main - INFO - Restoring training from checkpoint: checkpoints/
 2025-08-04 19:01:01,331 - nav_rl_main - INFO - Starting DRL navigation training for 300 iterations...
+2025-08-05 01:11:06,802 - nav_rl_main - ERROR - An error occurred during the RL process: 'NoneType' object has no attribute 'get'
+Traceback (most recent call last):
+  File "/home/josecarrillouru/Framework/examples/robot_navigation/run_navigation_task_rl.py", line 103, in main
+    f"Iteration {total_iterations}/{args.iterations}: "
+AttributeError: 'NoneType' object has no attribute 'get'
+2025-08-05 01:11:06,805 - nav_rl_main - INFO - Script finished.
