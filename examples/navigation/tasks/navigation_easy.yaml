@@ -1,0 +1,21 @@
+task_name: "Easy Navigation"
+description: "Navigate to target in open space with simple paths"
+scene_file: "examples/navigation/scenes/navigation_easy.ttt"
+env_class: src.core.navigation_env.NavigationEnv
+
+robots_setup:
+  - name: "AstiPioneerHybrid"
+    type: "AstiPioneerHybrid"
+environment_objects:
+  - name: "NavTarget"
+    type: "static_target"
+learning_objective:
+  type: "navigate"
+  target_object: "NavTarget"
+  success_threshold_distance: 0.2
+max_episode_steps: 360
+possible_target_positions:
+  - name: "TargetPos1"
+  - name: "TargetPos2"
+  - name: "TargetPos3"
+  - name: "TargetPos4"

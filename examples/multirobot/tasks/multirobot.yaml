@@ -1,0 +1,60 @@
+scene_file: examples/multirobot/scenes/multi_nav.ttt
+env_class: examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv
+multi_agent: true
+
+use_camera: true
+defer_camera: false
+camera_key: front_camera
+camera_size: [64,64]
+camera_grayscale: true
+frame_stack: 4
+max_episode_steps: 800
+success_dist: 0.40
+collision_dist: 0.30
+verbose: false
+log_every_steps: 50
+dual_stagnation_limit: 240
+enable_dual_stagnation_terminate: false
+
+task_config:
+  robots_setup:
+    - { type: "AstiPioneerHybrid", name: "AstiPioneer1",
+        wheel_joints: ["AstiPioneer1_leftMotor","AstiPioneer1_rightMotor"],
+        sensor_prefix: "AstiPioneer1_ultrasonicSensor",
+        cameras: { front_camera: { name: "Vision_sensor1" } } }
+    - { type: "AstiPioneerHybrid", name: "AstiPioneer2",
+        wheel_joints: ["AstiPioneer2_leftMotor","AstiPioneer2_rightMotor"],
+        sensor_prefix: "AstiPioneer2_ultrasonicSensor",
+        cameras: { front_camera: { name: "Vision_sensor2" } } }
+
+  moving_nav_targets: true
+  nav_target_objects: [NavTarget, NavTarget2]
+  target_dummies: [TargetPos1, TargetPos2, TargetPos3, TargetPos4]
+  start_dummies:  [StartPos1, StartPos2, StartPos3, StartPos4]
+
+  dynamic_obstacle:
+    enabled: true
+    name: MidObstacle
+    spawn_prob: 0.5
+    hide_offset: 15.0
+
+  reward_weights:
+    progress: 5.0
+    time_penalty: -0.05
+    heading: 0.25
+    completion: 25.0
+    final_bonus: 15.0
+    collision: -25.0
+    no_progress_penalty: -12.0
+
+  # Shaping
+  shaping_gamma: 0.99
+  progress_alpha: 1.0
+  near_target_bonus: 2.0
+  near_target_radius_mult: 2.0
+  vel_align_scale: 0.6
+  spin_penalty_scale: -0.2
+
+  # No‑progress detection
+  stuck_delta: 0.01
+  no_progress_threshold: 160

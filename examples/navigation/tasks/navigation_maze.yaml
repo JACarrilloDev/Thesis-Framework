@@ -1,0 +1,18 @@
+task_name: "Maze Navigation"
+description: "Navigate through a complex maze environment"
+scene_file: "examples/navigation/scenes/navigation_maze.ttt"
+robots_setup:
+  - name: "AstiPioneerHybrid"
+    type: "AstiPioneerHybrid"
+environment_objects:
+  - name: "NavTarget"
+    type: "static_target"
+learning_objective:
+  type: "navigate"
+  target_object: "NavTarget"
+  success_threshold_distance: 0.2
+max_episode_steps: 600  # Increased for maze navigation
+possible_target_positions:
+  - name: "TargetPos1"
+  - name: "TargetPos2"
+  - name: "TargetPos3"

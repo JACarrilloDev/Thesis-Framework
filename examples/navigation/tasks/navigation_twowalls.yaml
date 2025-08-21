@@ -1,0 +1,17 @@
+task_name: "Corridor Navigation"
+description: "Navigate through an environment with two walls"
+scene_file: "examples/navigation/scenes/navigation_corridor.ttt"
+robots_setup:
+  - name: "AstiPioneerHybrid"
+    type: "AstiPioneerHybrid"
+environment_objects:
+  - name: "NavTarget"
+    type: "static_target"
+learning_objective:
+  type: "navigate"
+  target_object: "NavTarget"
+  success_threshold_distance: 0.2
+max_episode_steps: 500  # Increased for corridor navigation
+possible_target_positions:
+  - name: "TargetPos1"
+  - name: "TargetPos2"

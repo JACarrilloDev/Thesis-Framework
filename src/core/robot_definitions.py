@@ -1,24 +1,6 @@
 from typing import Optional
 
 PREDEFINED_ROBOTS = {
-    "Panda_Default": { # Example for Panda if you have one
-        "description": "Franka Emika Panda robot arm.",
-        "model_file": "src/robots/Panda.ttm", # Path to the .ttm model file if loaded separately
-        "robot_name_in_scene": "Panda",       # Default name of the robot in the CoppeliaSim scene
-        "arm_joints": [
-            "Panda_joint1", "Panda_joint2", "Panda_joint3", "Panda_joint4",
-            "Panda_joint5", "Panda_joint6", "Panda_joint7"
-        ],
-        "gripper_name": "Panda_gripper", # Name of the gripper object/mechanism
-        "gripper_joints": ["Panda_finger_joint1", "Panda_finger_joint2"], # Joints controlling the gripper
-        "gripper_actuation_type": "force_closure", # or "joint_control"
-        "end_effector_tip_name": "Panda_tip", # Name of the dummy object at the EE tip
-        "cameras": {
-            "hand_camera": "Panda_handCamera" # Example camera
-        },
-        "action_space_components": ["arm_joint_velocities", "gripper_command"],
-        "observation_components": ["arm_joint_positions", "gripper_state", "ee_pose"]
-    },
     "AstiPioneerHybrid": {
         "description": "Hybrid robot: Pioneer base with Asti arms and body, vision sensor on mast.",
         "robot_name_in_scene": "AstiPioneerHybrid",  # Name in CoppeliaSim scene

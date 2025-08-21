@@ -9,6 +9,7 @@ from pyrep.objects.camera import Camera
 from pyrep.objects.proximity_sensor import ProximitySensor
 import numpy as np
 import math
+import cv2
 
 from .logger import setup_logger
 
@@ -18,6 +19,7 @@ class RobotController:
     def __init__(self, robot_definition: dict, pyrep_instance: PyRep):
         self.pr = pyrep_instance
         self.definition = robot_definition
+        self.sensor_prefix = self.definition.get("sensor_prefix", "")
         self.robot_name_in_scene = self.definition.get("robot_name_in_scene", "UnknownRobot")
         rc_logger.info(f"Initializing RobotController for: {self.robot_name_in_scene}")
 
@@ -95,6 +97,49 @@ class RobotController:
 
         rc_logger.info(f"RobotController for '{self.robot_name_in_scene}' components initialized.")
 
+    def _resolve_object_handle(self, name: str):
+        """Return a PyRep handle (Dummy or Shape) or None. Try Dummy first to avoid type mismatch warnings."""
+        try:
+            if Dummy.exists(name):
+                return Dummy(name)
+        except Exception:
+            pass
+        try:
+            if Shape.exists(name):
+                return Shape(name)
+        except Exception:
+            pass
+        rc_logger.warning(f"_resolve_object_handle: '{name}' not found as Dummy or Shape.")
+        return None
+
+    def get_object_pose(self, object_name: str) -> Optional[list]:
+        """Unified getter that works for Shape or Dummy. Returns [x,y,z,qx,qy,qz,qw] or None."""
+        handle = self._resolve_object_handle(object_name)
+        if not handle:
+            return None
+        try:
+            return handle.get_pose()
+        except Exception as e:
+            rc_logger.warning(f"get_object_pose failed for '{object_name}': {e}")
+            return None
+
+    def set_object_pose(self, object_name: str, pose: list) -> bool:
+        """Set pose [x,y,z,qx,qy,qz,qw] of a scene object (Dummy or Shape)."""
+        try:
+            obj_handle = self._resolve_object_handle(object_name)
+            if obj_handle is None:
+                rc_logger.warning(f"set_object_pose: object '{object_name}' not found.")
+                return False
+            if len(pose) == 7:
+                obj_handle.set_pose(pose)
+            else:
+                rc_logger.warning(f"set_object_pose: pose length {len(pose)} invalid (need 7).")
+                return False
+            return True
+        except Exception as e:
+            rc_logger.error(f"Error setting pose for '{object_name}': {e}")
+            return False
+
     def set_base_target_velocities(self, linear_velocity_xy: list, angular_velocity_z: float):
         # Only use vx (forward), ignore vy for differential drive
         vx = linear_velocity_xy[0]
@@ -128,23 +173,23 @@ class RobotController:
     def get_proximity_sensor_readings(self):
         readings = []
         for i in range(1, 17):
-            sensor_name = f"Pioneer_p3dx_ultrasonicSensor{i}"
-            try:
-                # First check if sensor exists to avoid unnecessary warnings
-                if not ProximitySensor.exists(sensor_name):
-                    rc_logger.debug(f"Proximity sensor '{sensor_name}' not found.")  # Changed to debug level
-                    readings.append(1.0)
+            # Try prefixed first if provided
+            base_name = f"Pioneer_p3dx_ultrasonicSensor{i}"
+            candidate = f"{self.sensor_prefix}{i}" if self.sensor_prefix else base_name
+            names_to_try = [candidate] if candidate != base_name else [base_name]
+            if candidate != base_name:
+                names_to_try.append(base_name)
+            value = 1.0
+            for name in names_to_try:
+                try:
+                    if ProximitySensor.exists(name):
+                        sensor = ProximitySensor(name)
+                        dist = sensor.read()
+                        value = 1.0 if dist < 0 else dist
+                        break
+                except Exception:
                     continue
-
-                sensor = ProximitySensor(sensor_name)
-                distance = sensor.read()
-                # If we get -1, treat it as max distance instead of an error
-                readings.append(1.0 if distance < 0 else distance)
-                
-            except Exception as e:
-                rc_logger.debug(f"Sensor {sensor_name} read failed: {e}")  # Changed to debug level
-                readings.append(1.0)  # Default to max distance
-                
+            readings.append(value)
         return readings
 
     def check_sandwich_grasp(self, object_name: str, threshold: float = 0.05) -> bool:
@@ -215,13 +260,6 @@ class RobotController:
         rc_logger.warning("End-effector tip handle not available for get_end_effector_pose. Returning base pose.")
         return self.robot_model_handle.get_pose().tolist()
 
-    def get_object_pose(self, object_name: str) -> Optional[list]:
-        if Dummy.exists(object_name):
-            obj_handle = Dummy(object_name)
-            return obj_handle.get_pose().tolist()
-        rc_logger.warning(f"Object '{object_name}' not found for get_object_pose.")
-        return None
-
     def get_camera_image(self, camera_key: str):
         """Get image from a camera by its key in camera_definitions.
         
@@ -239,6 +277,42 @@ class RobotController:
                 return None
         rc_logger.warning(f"Camera '{camera_key}' not found in handles.")
         return None
+
+    def get_camera_image_processed(
+        self,
+        camera_key: str,
+        size=(84, 84),
+        grayscale: bool = True,
+        normalize: bool = True,
+        clip: bool = True
+    ):
+        """
+        Returns processed image (H,W,C) float32 in [0,1] (if normalize) or uint8.
+        Falls back to zeros if capture fails.
+        """
+        raw = self.get_camera_image(camera_key)
+        if raw is None:
+            if grayscale:
+                return np.zeros((size[1], size[0], 1), dtype=np.float32 if normalize else np.uint8)
+            return np.zeros((size[1], size[0], 3), dtype=np.float32 if normalize else np.uint8)
+
+        # raw likely already RGB float [0..1] or uint8; make it uint8 first
+        arr = raw
+        if arr.dtype != np.uint8:
+            arr = (np.clip(arr, 0, 1) * 255).astype(np.uint8)
+
+        arr_resized = cv2.resize(arr, size, interpolation=cv2.INTER_AREA)
+
+        if grayscale:
+            arr_resized = cv2.cvtColor(arr_resized, cv2.COLOR_RGB2GRAY)
+            arr_resized = arr_resized[:, :, None]
+
+        if normalize:
+            out = arr_resized.astype(np.float32) / 255.0
+            if clip:
+                out = np.clip(out, 0.0, 1.0)
+            return out
+        return arr_resized
 
     def check_collision(self, object_names_to_check_against: list = None) -> bool:
         if object_names_to_check_against:

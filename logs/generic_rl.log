@@ -1,0 +1,39 @@
+2025-08-18 02:35:13,525 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 02:35:49,064 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 02:35:55,067 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 02:36:22,198 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 02:38:41,457 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 02:42:12,651 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 03:01:29,286 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-18 03:49:44,557 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 00:31:24,602 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 01:20:30,559 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 01:21:17,087 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 03:34:20,400 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 03:39:46,241 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 03:42:16,445 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 03:48:17,089 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-19 03:54:50,226 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 02:13:41,827 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 02:18:06,854 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 02:18:40,735 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 02:21:22,195 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 03:20:03,293 - generic_rl - WARNING - robots_setup empty in YAML; ensure env will not expect robot mapping.
+2025-08-20 03:20:03,294 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=False
+2025-08-20 03:32:15,294 - generic_rl - WARNING - robots_setup empty in YAML; ensure env will not expect robot mapping.
+2025-08-20 03:32:15,294 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=False
+2025-08-20 03:39:23,847 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 03:53:04,698 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 14:42:18,414 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 14:42:52,162 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 16:37:03,518 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 17:01:06,121 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 17:20:49,764 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 19:18:28,495 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 19:20:21,091 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 19:36:48,430 - generic_rl - INFO - Training complete.
+2025-08-20 20:43:00,695 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 20:48:50,648 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 21:02:38,673 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-20 21:14:25,272 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-21 00:00:23,907 - generic_rl - INFO - Training complete.
