@@ -6,6 +6,13 @@ from src.core.logger import setup_logger
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 logging.getLogger("ray").setLevel(logging.ERROR)
 
+class _SilenceGetSliceDeprecation(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "_get_slice_indices" not in record.getMessage()
+
+logging.getLogger("ray").addFilter(_SilenceGetSliceDeprecation())
+logging.getLogger("py.warnings").addFilter(_SilenceGetSliceDeprecation())
+
 log = setup_logger("generic_rl", "logs/generic_rl.log", console_output=True)
 
 def import_env_class(dotted: str, fallback_file: str = None, fallback_class: str = None):
@@ -136,9 +143,13 @@ def main():
     ap.add_argument("--checkpoint_path", help="Checkpoint to restore from.")
     ap.add_argument("--headless", action="store_true")
     ap.add_argument("--train_batch_size", type=int, default=3200)
-    ap.add_argument("--sgd_minibatch_size", type=int, default=128)
-    ap.add_argument("--lr", type=float, default=5e-5)
+    ap.add_argument("--sgd_minibatch_size", type=int, default=256)
+    ap.add_argument("--lr", type=float, default=3e-4)
     ap.add_argument("--override_env_class", help="Override env_class in YAML.")
+    ap.add_argument("--batch_mode", choices=["truncate_episodes","complete_episodes"], default="truncate_episodes")
+    ap.add_argument("--rollout_fragment_length", type=int, default=128)
+    ap.add_argument("--use_default_curriculum", action="store_true")
+    ap.add_argument("--curriculum_offset", type=int, default=0, help="Subtract this from global_iter for curriculum stage selection.")
     args = ap.parse_args()
 
     if not os.path.exists(args.task_yaml):
@@ -161,12 +172,43 @@ def main():
 
     log.info(f"Launching training env_class={env_class_path} multi_agent={env_config.get('multi_agent', False)}")
 
+    curriculum_fn = None
+    if args.use_default_curriculum:
+        # 3-stage plan across GLOBAL PPO iterations (with optional offset)
+        def default_curriculum(global_iter: int):
+            g = max(0, int(global_iter) - int(args.curriculum_offset))
+            # Stage A (0-400): easier success, obstacle hidden
+            if g < 400:
+                return {
+                    "success_dist": 1.0,
+                    "enable_obstacle_cfg": True,
+                    "obstacle_prob": 0.0,
+                    "dual_stagnation_limit": 240,
+                }
+            # Stage B (400-900): tighten and reintroduce obstacle
+            if g < 900:
+                return {
+                    "success_dist": 0.8,
+                    "enable_obstacle_cfg": True,
+                    "obstacle_prob": 0.5,
+                    "dual_stagnation_limit": 200
+                }
+            # Stage C (900+): longest horizon
+            return {
+                "success_dist": 0.7,
+                "dual_stagnation_limit": 240
+            }
+        curriculum_fn = default_curriculum
+
     trainer = RLTrainer(
         env_class=env_class,
         env_config=env_config,
         train_batch_size=args.train_batch_size,
         sgd_minibatch_size=args.sgd_minibatch_size,
-        lr=args.lr
+        lr=args.lr,
+        curriculum_fn=curriculum_fn,
+        batch_mode=args.batch_mode,
+        rollout_fragment_length=args.rollout_fragment_length
     )
 
     if args.checkpoint_path and os.path.exists(args.checkpoint_path):

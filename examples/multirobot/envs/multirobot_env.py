@@ -111,6 +111,9 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         self.w_collision      = rw.get("collision", -20.0)
         self.w_no_progress    = rw.get("no_progress_penalty", -10.0)
         self.heading_weight   = rw.get("heading", 0.4)
+        self.w_reverse        = rw.get("reverse_penalty", -1.5)
+        self.w_prox_wall      = rw.get("prox_wall_penalty", -3.0)
+        self.w_backtrack      = rw.get("backtrack_penalty", -2.0)
 
         # No-progress detection
         self.stuck_delta = task_cfg.get("stuck_delta", 0.01)
@@ -156,14 +159,17 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             if inst.get("cameras"):
                 base_def["cameras"] = inst["cameras"]
 
-            if self.use_camera:
+            # If not using camera, remove cameras to avoid VisionSensor init (Qt/GL) in headless
+            if not self.use_camera:
+                base_def["cameras"] = {}
+            else:
+                # Using camera: optionally defer capture (dummy frames) until enabled
                 for cam_def in base_def.get("cameras", {}).values():
                     nm = cam_def.get("name")
                     if nm:
                         self._deferred_camera_names.add(nm)
-
-            if self.use_camera and not self.capture_enabled:
-                base_def["cameras"] = {}
+                if not self.capture_enabled:
+                    base_def["cameras"] = {}
 
             self.controllers[aid] = RobotController(base_def, self.sim.pr)
 
@@ -220,6 +226,7 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         )
         self._forward_speed_scale = self.task_cfg.get("forward_speed_scale", 0.6)
         self._yaw_speed_scale = self.task_cfg.get("yaw_speed_scale", 1.2)
+        self._front_prox_idx = list(self.task_cfg.get("front_prox_indices", [2,3,4,5]))
 
         if self.enable_obstacle_cfg:
             orig_pose = self.controllers[AGENTS[0]].get_object_pose(self.obstacle_name)
@@ -242,6 +249,12 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         self.enable_dual_stagnation_terminate = self.task_cfg.get("enable_dual_stagnation_terminate", True)
         self.dual_stagnation_limit = self.task_cfg.get("dual_stagnation_limit", 240)
         self._dual_stagnation_counter = 0
+
+        # Early-termination controls (optional)
+        self.max_hits_per_agent = self.task_cfg.get("max_hits_per_agent", 2)  # default = original 2-phase
+        self.max_total_hits = self.task_cfg.get("max_total_hits", None)       # e.g., 2 to end after both do phase-1
+        
+        self._alive_agents = set(AGENTS)
 
     def enable_camera_capture(self):
         """Call (e.g. via curriculum) to start real image capture mid-training."""
@@ -290,11 +303,26 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             return False
 
     # ---------- Helpers ----------
-    def _xy(self, aid): return np.array(self.controllers[aid].get_robot_base_pose()[:2], dtype=np.float32)
+    def _finite(self, x, fill=0.0):
+        return np.nan_to_num(x, nan=fill, posinf=fill, neginf=fill)
+
+    def _distance(self, a: Optional[np.ndarray], b: Optional[np.ndarray]) -> float:
+        """Finite-safe Euclidean distance between 2D points; large value if unknown."""
+        if a is None or b is None:
+           return 1e9
+        a = self._finite(np.asarray(a, dtype=np.float32))
+        b = self._finite(np.asarray(b, dtype=np.float32))
+        return float(np.linalg.norm(a - b))
+    
+    def _xy(self, aid):
+        pose = self.controllers[aid].get_robot_base_pose()
+        xy = np.array(pose[:2], dtype=np.float32) if pose is not None else np.array([0.0, 0.0], dtype=np.float32)
+        return self._finite(xy, 0.0)
+
     def _tpose_xy(self, idx):
         pose = self.controllers[AGENTS[0]].get_object_pose(self.target_names[idx])
-        return np.array(pose[:2], dtype=np.float32) if pose is not None else None
-    def _distance(self, a,b): return float(np.linalg.norm(a-b))
+        xy = np.array(pose[:2], dtype=np.float32) if pose is not None else None
+        return self._finite(xy, 0.0) if xy is not None else None
 
     def _pick_initial_targets(self):
         perm = list(range(4)); random.shuffle(perm)
@@ -336,7 +364,10 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
     def _get_nav_target_xy(self, aid: str):
         obj_name = self.nav_target_objects[AGENTS.index(aid)] if AGENTS.index(aid) < len(self.nav_target_objects) else self.nav_target_objects[0]
         pose = self.controllers[AGENTS[0]].get_object_pose(obj_name)
-        return np.array(pose[:2], dtype=np.float32) if pose is not None else None
+        if pose is None:
+            return None
+        xy = np.array(pose[:2], dtype=np.float32)
+        return self._finite(xy, 0.0)
 
     def _current_target_idx(self, aid):
         if self.completed_counts[aid] == 0: return self.first_phase_assign[aid]
@@ -351,7 +382,9 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
 
     def _heading_alignment(self, aid, self_xy, target_xy):
         pose = self.controllers[aid].get_robot_base_pose()
-        yaw = pose[5] if len(pose) >= 6 else 0.0
+        yaw = 0.0
+        if pose is not None and len(pose) >= 6:
+            yaw = float(self._finite(np.array([pose[5]], dtype=np.float32))[0])
         vec = target_xy - self_xy
         tgt_ang = np.arctan2(vec[1], vec[0])
         diff = np.arctan2(np.sin(tgt_ang - yaw), np.cos(tgt_ang - yaw))
@@ -393,10 +426,12 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             dist_cur = min(80.0, np.linalg.norm(cur_vec))
             heading_align = self._heading_alignment(aid, self_xy, tgt_xy)
         nxt_vec = self._next_target_vec(aid, self_xy)
-        phase = float(self.completed_counts.get(aid, 0))
+        # Phase: 0 before first hit, 1 after (strict {0,1})
+        phase = 1.0 if (self.completed_counts.get(aid, 0) > 0) else 0.0
         prox = np.clip(self.controllers[aid].get_proximity_sensor_readings(), 0.0, 1.0)
+        prox = np.nan_to_num(prox, nan=0.0, posinf=1.0, neginf=0.0)
         obstacle_present = 1.0 if self.enable_obstacle_active else 0.0
-        return np.concatenate([
+        out = np.concatenate([
             self_xy, other_rel, cur_vec, nxt_vec,
             np.array([
                 phase,
@@ -408,15 +443,18 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             ], dtype=np.float32),
             prox
         ]).astype(np.float32)
+        return np.nan_to_num(out, nan=0.0, posinf=0.0, neginf=0.0)
 
     def _build_obs(self, aid):
         vect = self._build_vect_obs(aid)
+        vect = np.nan_to_num(vect, nan=0.0, posinf=0.0, neginf=0.0)
         if not self.use_camera:
             return vect
         fb = self._frame_buffers[aid]
         frame = self._capture_frame(aid)
-        fb.append(frame)
+        fb.append(self._finite(frame, 0.0))
         stacked = self._stacked_image(aid).astype(np.float32)
+        stacked = np.nan_to_num(stacked, nan=0.0, posinf=0.0, neginf=0.0)
         return {"vect": vect, "img": stacked}
 
     def _compute_agent_reward(self, aid, vect_obs):
@@ -435,11 +473,15 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
                 delta = prev - dist_cur
                 made_progress = delta > self.stuck_delta
                 if made_progress:
+                    # Progress shaping + potential-based term
                     reward += np.clip(delta, -0.5, 0.5) * self.w_progress
                     phi_prev = -self.progress_alpha * prev
                     phi_cur  = -self.progress_alpha * dist_cur
                     reward += self.shaping_gamma * phi_cur - phi_prev
                 else:
+                    # Backtracking penalty if moving away
+                    if delta < -0.02:
+                        reward += self.w_backtrack * (-delta)
                     self.no_progress_steps[aid] += 1
                     if (self.no_progress_steps[aid] % 25 == 0) and self.verbose:
                         print(f"[Ep {self.episode_index} Step {self.current_step}] {aid} no-progress counter={self.no_progress_steps[aid]} delta={(prev - dist_cur):.4f}")
@@ -452,38 +494,60 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
                     self.no_progress_steps[aid] = 0
             self.prev_dist[aid] = dist_cur
 
+        # Heading alignment
         reward += self.heading_weight * heading_align
 
-        vx = self.controllers[aid].get_base_velocities()[0]
-        if prox[3] < 0.2 and vx > 0.12:
-            reward += -1.5 * vx
-        elif vx > 0.10:
-            reward += 0.8 * vx
+        # Base speeds
+        vx, _, wz = self.controllers[aid].get_base_velocities()
+        vx = float(self._finite(np.array([vx], dtype=np.float32))[0])
+        wz = float(self._finite(np.array([wz], dtype=np.float32))[0])
+        # Reverse penalty
+        if vx < -0.05:
+            reward += self.w_reverse * abs(vx)
+        # Forward speed shaping (prefer forward when safe)
+        # Proximity wall penalty (front arc sensors only)
+        if len(self._front_prox_idx) > 0:
+            front_vals = [prox[i] for i in self._front_prox_idx if i < len(prox)]
+            if front_vals:
+                min_front = float(np.min(front_vals))
+                # penalize getting too close to walls/objects
+                if min_front < 0.30:
+                    reward += self.w_prox_wall * (0.30 - min_front)
+                # discourage fast forward when obstacle is near
+                if min_front < 0.20 and vx > 0.10:
+                    reward += -2.0 * vx
+        # Slight reward for smooth forward motion otherwise
+        if vx > 0.10:
+            reward += 0.6 * vx
         elif vx < -0.25:
             reward += -1.0 * abs(vx)
 
+        # Velocity alignment with target
         tgt_xy = self._get_nav_target_xy(aid)
         if tgt_xy is not None and dist_cur > 0:
             self_xy = self._xy(aid)
             vec = tgt_xy - self_xy
             tgt_dir = vec / (np.linalg.norm(vec) + 1e-6)
-            yaw = self.controllers[aid].get_robot_base_pose()[5]
+            pose = self.controllers[aid].get_robot_base_pose()
+            yaw = float(self._finite(np.array([pose[5] if (pose is not None and len(pose) >= 6) else 0.0], dtype=np.float32))[0])
             fwd_axis = np.array([np.cos(yaw), np.sin(yaw)])
             alignment_cos = float(np.clip(np.dot(fwd_axis, tgt_dir), -1.0, 1.0))
             reward += max(0.0, vx) * alignment_cos * self.vel_align_scale
 
-        base_vels = self.controllers[aid].get_base_velocities()
-        wz = base_vels[2] if len(base_vels) > 2 else 0.0
+        # Spin penalty when not progressing
         if self.prev_dist[aid] is not None and self.no_progress_steps[aid] > 10 and abs(wz) > 0.6:
             reward += self.spin_penalty_scale * abs(wz)
 
+        # Light incentive to move early if obstacle present
         if obstacle_present > 0.5 and vx > 0.05 and self.completed_counts[aid] == 0 and self.current_step < 100:
             reward += 0.02
 
+        # Near-target ramp
         if cur_idx is not None and 0 < dist_cur < self.near_target_radius_mult * self.success_dist:
             span = self.near_target_radius_mult * self.success_dist
             reward += ((span - dist_cur) / span) * self.near_target_bonus
 
+        reward = float(np.nan_to_num(reward, nan=0.0, posinf=0.0, neginf=0.0))
         self._made_progress_flags[aid] = made_progress
         return reward
 
@@ -560,43 +624,42 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
               f"{[self.target_names[i] for i in self._remaining_after_initial]})")
         if self.enable_obstacle_cfg:
             print(f" Obstacle {self.obstacle_name}: {'ACTIVE' if self.enable_obstacle_active else 'HIDDEN'}")
+        self._alive_agents = set(AGENTS)
         return {aid: self._build_obs(aid) for aid in AGENTS}, {}
 
     def step(self, action_dict: Dict[str, np.ndarray]):
         self.current_step += 1
         self._made_progress_flags = {aid: False for aid in AGENTS}
-        for aid, act in action_dict.items():
-            a = np.clip(act, self.action_space.low, self.action_space.high)
+        # Only apply actions to agents that are currently alive
+        active_ids = [aid for aid in action_dict.keys() if aid in self._alive_agents]
+        for aid in active_ids:
+            act = action_dict[aid]
+            a = np.clip(np.nan_to_num(act, nan=0.0, posinf=0.0, neginf=0.0),
+                        self.action_space.low, self.action_space.high)
             self.controllers[aid].set_base_target_velocities(
                 [float(a[0]) * self._forward_speed_scale, 0.0],
                 float(a[1]) * self._yaw_speed_scale
             )
         self.sim.step()
 
-        vect_obs_cache = {aid: self._build_vect_obs(aid) for aid in AGENTS}
+        vect_obs_cache = {aid: self._build_vect_obs(aid) for aid in active_ids}
         rewards = {}
-
-        for aid in AGENTS:
+        for aid in active_ids:
             vect = vect_obs_cache[aid]
             dist_cur = vect[11]
             rewards[aid] = self._compute_agent_reward(aid, vect)
-
+            rewards[aid] = float(np.nan_to_num(rewards[aid], nan=0.0, posinf=0.0, neginf=0.0))
             cur_idx = self._current_target_idx(aid)
             if cur_idx is not None and dist_cur < self.success_dist:
-                # Only award once per target index
                 if self.target_completed_by[cur_idx] is None:
                     rewards[aid] += self.w_completion
                     self.target_completed_by[cur_idx] = aid
                     self.target_completion_step[cur_idx] = self.current_step
                     self.nav_hits[aid] += 1
                     self.completed_counts[aid] += 1
+                    print(f"[Ep {self.episode_index} Step {self.current_step}] {aid} HIT target {self.target_names[cur_idx]} (hits={self.nav_hits[aid]})")
 
-                    if self.verbose:
-                        print(f"[Ep {self.episode_index} Step {self.current_step}] {aid} HIT target {self.target_names[cur_idx]} (hits={self.nav_hits[aid]})")
-
-                    # Phase transition: choose second targets once both at 1
                     if self.completed_counts[aid] == 1:
-                        # If phase2 not yet chosen, decide NOW
                         if not self.second_phase_chosen:
                             self._decide_second_phase(aid, self._remaining_after_initial)
                         nxt_idx = self._current_target_idx(aid)
@@ -619,38 +682,61 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             self.enable_dual_stagnation_terminate and
             self._dual_stagnation_counter >= self.dual_stagnation_limit
         )
-        if early_stagnant_done and self.verbose:
+        if early_stagnant_done:
             print(f"[Ep {self.episode_index} Step {self.current_step}] Early termination: dual stagnation trigger.")
 
         # Collision
         if self._collision():
-            for aid in AGENTS:
+            for aid in active_ids:
                 rewards[aid] += self.w_collision
-            if self.verbose:
-                print(f"[Ep {self.episode_index} Step {self.current_step}] Collision penalized.")
+            # if self.verbose:
+            print(f"[Ep {self.episode_index} Step {self.current_step}] Collision penalized.")
 
+        # Update last rewards only for agents that produced a reward this step
         for aid in AGENTS:
-            self.last_step_rewards[aid] = rewards[aid]
+            if aid in rewards:
+                self.last_step_rewards[aid] = rewards[aid]
 
-        obs = {aid: self._build_obs(aid) for aid in AGENTS}
+        obs = {aid: self._build_obs(aid) for aid in active_ids}
 
         # Termination / truncation bookkeeping
-        terminateds = {aid: self.completed_counts[aid] == 2 for aid in AGENTS}
-        # Early stagnation counts as truncation (unless already terminated)
-        truncateds = {
-            aid: ((self.current_step >= self.max_steps) or early_stagnant_done) and not terminateds[aid]
+        # Per-agent hits target: >= max_hits_per_agent (default 2 keeps original behavior)
+        def _per_agent_done(aid):
+            return self.completed_counts[aid] >= (self.max_hits_per_agent if self.max_hits_per_agent is not None else 2)
+
+        terminateds_all = {aid: _per_agent_done(aid) for aid in AGENTS}
+        if self.max_total_hits is not None:
+            total_hits = sum(self.completed_counts.values())
+            if total_hits >= self.max_total_hits:
+                for aid in AGENTS:
+                    terminateds_all[aid] = True
+
+        truncateds_all = {
+            aid: ((self.current_step >= self.max_steps) or early_stagnant_done) and not terminateds_all[aid]
             for aid in AGENTS
         }
-        terminateds["__all__"] = all(terminateds.values())
-        truncateds["__all__"] = (not terminateds["__all__"]) and any(truncateds.values())
+
+        # Return dones only for agents that acted this step (+ __all__)
+        terminateds = {aid: terminateds_all[aid] for aid in active_ids}
+        truncateds = {aid: truncateds_all[aid] for aid in active_ids}
+
+        terminateds["__all__"] = all(terminateds_all.values())
+        truncateds["__all__"] = (not terminateds["__all__"]) and any(truncateds_all.values())
+
+        # Update alive set for next step
+        for aid in active_ids:
+            if terminateds.get(aid, False) or truncateds.get(aid, False):
+                if aid in self._alive_agents:
+                    self._alive_agents.remove(aid)
 
         episode_end = terminateds["__all__"] or truncateds["__all__"]
 
         if (self.current_step % self.log_every == 0) or episode_end:
-            d0 = vect_obs_cache["robot_0"][11]; d1 = vect_obs_cache["robot_1"][11]
-            print(f"[Ep {self.episode_index} Step {self.current_step}] "
-                  f"r0 Dist={d0:.2f} R={self.last_step_rewards['robot_0']:.3f} Hits={self.nav_hits['robot_0']} | "
-                  f"r1 Dist={d1:.2f} R={self.last_step_rewards['robot_1']:.3f} Hits={self.nav_hits['robot_1']}")
+            parts = []
+            for aid in active_ids:
+                d = vect_obs_cache[aid][11]
+                parts.append(f"{aid} Dist={d:.2f} R={self.last_step_rewards[aid]:.3f} Hits={self.nav_hits[aid]}")
+            print(f"[Ep {self.episode_index} Step {self.current_step}] " + " | ".join(parts))
 
         full_success = all(self.completed_counts[a] == 2 for a in AGENTS)
         infos = {
@@ -661,10 +747,13 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
                 "early_stagnation": early_stagnant_done,
                 "start_dummy": self.start_dummy_chosen.get(aid, ""),
                 "phase2_started": self.second_phase_chosen,
-                "full_success": full_success
-            } for aid in AGENTS
+                "full_success": full_success,
+                "max_hits_per_agent": self.max_hits_per_agent if hasattr(self, "max_hits_per_agent") else 2,
+                "max_total_hits": self.max_total_hits if hasattr(self, "max_total_hits") else None,
+                "num_agents": len(AGENTS),
+            } for aid in active_ids
         }
-        # Provide single-agent success alias on first agent (used by generic tooling)
-        if episode_end:
-            infos["robot_0"]["success"] = full_success
+        if episode_end and active_ids:
+            infos[active_ids[0]]["success"] = full_success
+
         return obs, rewards, terminateds, truncateds, infos

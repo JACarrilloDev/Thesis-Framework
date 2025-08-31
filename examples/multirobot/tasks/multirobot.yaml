@@ -3,18 +3,18 @@ env_class: examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv
 multi_agent: true
 
 use_camera: true
-defer_camera: false
+defer_camera: true
 camera_key: front_camera
 camera_size: [64,64]
 camera_grayscale: true
-frame_stack: 4
-max_episode_steps: 800
-success_dist: 0.40
+frame_stack: 1
+max_episode_steps: 650
+success_dist: 1.0
 collision_dist: 0.30
 verbose: false
-log_every_steps: 50
+log_every_steps: 100
 dual_stagnation_limit: 240
-enable_dual_stagnation_terminate: false
+enable_dual_stagnation_terminate: true
 
 task_config:
   robots_setup:
@@ -32,6 +32,10 @@ task_config:
   target_dummies: [TargetPos1, TargetPos2, TargetPos3, TargetPos4]
   start_dummies:  [StartPos1, StartPos2, StartPos3, StartPos4]
 
+  # End episode after both robots complete their first target
+  max_hits_per_agent: 1
+  max_total_hits: 2
+
   dynamic_obstacle:
     enabled: true
     name: MidObstacle
@@ -39,21 +43,29 @@ task_config:
     hide_offset: 15.0
 
   reward_weights:
-    progress: 5.0
-    time_penalty: -0.05
-    heading: 0.25
-    completion: 25.0
-    final_bonus: 15.0
-    collision: -25.0
+    progress: 8.0
+    time_penalty: -0.015
+    heading: 0.35
+    completion: 30.0
+    final_bonus: 20.0
+    collision: -40.0
     no_progress_penalty: -12.0
+    reverse_penalty: -1.5
+    prox_wall_penalty: -3.0
+    backtrack_penalty: -2.0
 
   # Shaping
   shaping_gamma: 0.99
   progress_alpha: 1.0
-  near_target_bonus: 2.0
-  near_target_radius_mult: 2.0
+  near_target_bonus: 4.0
+  near_target_radius_mult: 3.0
   vel_align_scale: 0.6
   spin_penalty_scale: -0.2
+
+  # Controller scaling
+  forward_speed_scale: 0.9
+  yaw_speed_scale: 1.8
+  front_prox_indices: [2,3,4,5]
 
   # No‑progress detection
   stuck_delta: 0.01

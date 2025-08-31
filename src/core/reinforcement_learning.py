@@ -19,63 +19,169 @@ except ImportError:
     USE_TQDM = False
 
 
-class MultiAgentMetricsCallback(DefaultCallbacks):
+class UnifiedMetricsCallback(DefaultCallbacks):
     """
-    Aggregates multi-agent episode metrics into custom_metrics.
-    Expects per-agent infos to optionally include:
-      - full_success (bool)
-      - phase2_started (bool)
-      - nav_hits (int)
-      - dual_stagnation_steps (int)
-      - success (bool) (will be injected if full_success present)
-    Falls back gracefully if keys absent (single-agent envs still work).
+    Unified metrics aggregation:
+      Single-agent: expects info.get('success') boolean (e.g. NavigationEnv).
+      Multi-agent: per-agent infos, may include:
+        full_success, phase2_started, nav_hits, dual_stagnation_steps.
+    Produces custom_metrics with *_mean suffix via RLlib aggregation.
+    Backward-compatible aliases: MultiAgentMetricsCallback, SuccessCallback.
     """
-    def on_episode_end(self, *, worker, base_env, policies, episode, **kwargs):
-        # RLlib EpisodeV2: multi-agent infos accessible via episode.last_infos (dict)
-        infos = {}
-        try:
-            infos = episode.last_infos or {}
-        except AttributeError:
-            # Fallback single agent
-            single = episode.last_info_for()
-            if single:
-                infos = {"agent": single}
-
-        full_success = False
-        phase2_started = False
-        dual_stagnation = 0
-        hits_all = []
-        hits_r0 = None
-        hits_r1 = None
-
+    def on_episode_step(self, *, worker, base_env, policies, episode, **kwargs):
+        # RLlib EpisodeV2 may not expose `last_infos`
+        infos = getattr(episode, "last_infos", None)
+        if infos is None:
+            infos = getattr(episode, "_agent_to_last_info", {}) or {}
+            if not infos:
+                try:
+                    single = episode.last_info_for()
+                    if single:
+                        infos = {"agent_0": single}
+                except Exception:
+                    infos = {}
+        ud = episode.user_data.setdefault("ma", {})
+        ud.setdefault("completed", {})
+        ud.setdefault("nav_hits", {})
+        st_max = ud.get("dual_stagnation_max", 0)
         for aid, inf in infos.items():
             if not isinstance(inf, dict):
                 continue
+            if "completed" in inf:
+                ud["completed"][aid] = int(inf["completed"])
+            if "nav_hits" in inf:
+                ud["nav_hits"][aid] = int(inf["nav_hits"])
+            st_max = max(st_max, int(inf.get("dual_stagnation_steps", 0)))
+            if inf.get("phase2_started"):
+                ud["phase2_started"] = True
+            if inf.get("full_success"):
+                ud["full_success"] = True
+            if inf.get("success"):
+                ud["any_success"] = True
+        ud["dual_stagnation_max"] = st_max
+
+    def on_episode_end(self, *, worker, base_env, policies, episode, **kwargs):
+        # Prefer accumulated user_data; fallback to last_infos
+        ud = episode.user_data.get("ma", {})
+        # RLlib EpisodeV2-safe retrieval
+        infos = getattr(episode, "last_infos", None)
+        if infos is None:
+            infos = getattr(episode, "_agent_to_last_info", {}) or {}
+        # Fallback single-agent
+        if not infos:
+            single = episode.last_info_for()
+            if single:
+                infos = {"agent_0": single}
+
+        # Accumulators
+        any_success = False
+        full_success = False
+        phase2_started = False
+        dual_stagnation_max = 0
+        nav_hits_vals: List[float] = []
+        nav_hits_r0 = None
+        nav_hits_r1 = None
+        total_completed_hits = 0
+        have_multi_progress = False
+
+        # Phase-1 scaling hints (defaults if env does not supply)
+        max_hits_per_agent = 2
+        max_total_hits = None
+        agent_ids = list(episode.get_agents()) if hasattr(episode, "get_agents") else list(infos.keys())
+
+        # Pass 1: read per-agent infos
+        for aid, inf in infos.items():
+            if not isinstance(inf, dict):
+                continue
+            # Single-agent success
+            if inf.get("success"):
+                any_success = True
+            # Multi-agent fields
             if inf.get("full_success"):
                 full_success = True
+                any_success = True
             if inf.get("phase2_started"):
                 phase2_started = True
-            # Keep max dual stagnation counter seen
-            dual_stagnation = max(dual_stagnation, inf.get("dual_stagnation_steps", 0))
+            dual_stagnation_max = max(dual_stagnation_max, int(inf.get("dual_stagnation_steps", 0)))
             if "nav_hits" in inf:
-                hits_all.append(inf["nav_hits"])
-            if aid == "robot_0":
-                hits_r0 = inf.get("nav_hits")
-            if aid == "robot_1":
-                hits_r1 = inf.get("nav_hits")
+                nav_hits_vals.append(float(inf["nav_hits"]))
+                if aid == "robot_0":
+                    nav_hits_r0 = inf["nav_hits"]
+                if aid == "robot_1":
+                    nav_hits_r1 = inf["nav_hits"]
+            if "completed" in inf:
+                have_multi_progress = True
+                try:
+                    c = int(inf["completed"])
+                except Exception:
+                    c = 0
+                total_completed_hits += max(0, min(c, max_hits_per_agent))
+            # Phase-1 scaling hints (optional from env)
+            if "max_hits_per_agent" in inf:
+                try:
+                    max_hits_per_agent = int(inf["max_hits_per_agent"])
+                except Exception:
+                    pass
+            if "max_total_hits" in inf:
+                try:
+                    max_total_hits = int(inf["max_total_hits"])
+                except Exception:
+                    pass
 
-        # Scalar metrics
-        episode.custom_metrics["success"] = 1.0 if full_success else 0.0
+        # Pass 2: merge accumulated per-step user_data
+        if "completed" in ud:
+            have_multi_progress = True
+            for c in ud["completed"].values():
+                total_completed_hits += max(0, min(int(c), max_hits_per_agent))
+        if "nav_hits" in ud:
+            vals = list(ud["nav_hits"].values())
+            if vals:
+                nav_hits_vals.append(float(np.mean(vals)))
+            nav_hits_r0 = ud["nav_hits"].get("robot_0", nav_hits_r0)
+            nav_hits_r1 = ud["nav_hits"].get("robot_1", nav_hits_r1)
+        dual_stagnation_max = max(dual_stagnation_max, int(ud.get("dual_stagnation_max", 0)))
+        phase2_started = phase2_started or bool(ud.get("phase2_started"))
+        full_success = full_success or bool(ud.get("full_success"))
+        any_success = any_success or bool(ud.get("any_success"))
+
+        # Success metric:
+        # - If we have multi-agent progress, scale by configured totals:
+        #   denom = max_total_hits (if provided) else max_hits_per_agent * num_agents
+        # - Else fallback to boolean success
+        if have_multi_progress:
+            denom = max_total_hits if (isinstance(max_total_hits, int) and max_total_hits > 0) \
+                    else (max_hits_per_agent * max(1, len(agent_ids)))
+            success_val = (float(total_completed_hits) / float(denom)) if denom > 0 else 0.0
+            episode.custom_metrics["success"] = float(np.clip(success_val, 0.0, 1.0))
+        else:
+            episode.custom_metrics["success"] = 1.0 if any_success else 0.0
+
+        # Additional, explicit phase-1 metrics:
+        # - success_phase1: scale by 2 (2 robots x 1 phase) -> shows 0.5 when only one robot hits.
+        # - success_qtr: scale by 4 (2 robots x 2 phases) -> shows 0.25/0.5 style even if episode ends early.
+        denom_phase1 = max(1, len(agent_ids))       # 2 robots -> 2
+        denom_phase2 = 2 * denom_phase1              # 2 robots * 2 phases
+        if have_multi_progress:
+            episode.custom_metrics["success_phase1"] = float(
+                np.clip((float(total_completed_hits) / float(denom_phase1)), 0.0, 1.0)
+            )
+            episode.custom_metrics["success_qtr"] = float(
+                np.clip((float(total_completed_hits) / float(denom_phase2)), 0.0, 1.0)
+            )
+        else:
+            base = 1.0 if any_success else 0.0
+            episode.custom_metrics["success_phase1"] = base
+            episode.custom_metrics["success_qtr"] = base
+
         episode.custom_metrics["full_success"] = 1.0 if full_success else 0.0
         episode.custom_metrics["phase2_started"] = 1.0 if phase2_started else 0.0
-        if hits_all:
-            episode.custom_metrics["nav_hits_mean"] = float(np.mean(hits_all))
-        if hits_r0 is not None:
-            episode.custom_metrics["nav_hits_r0"] = hits_r0
-        if hits_r1 is not None:
-            episode.custom_metrics["nav_hits_r1"] = hits_r1
-        episode.custom_metrics["dual_stagnation_steps"] = dual_stagnation
+        episode.custom_metrics["nav_hits_mean"] = float(np.mean(nav_hits_vals)) if nav_hits_vals else 0.0
+        episode.custom_metrics["nav_hits_r0"] = float(nav_hits_r0) if nav_hits_r0 is not None else 0.0
+        episode.custom_metrics["nav_hits_r1"] = float(nav_hits_r1) if nav_hits_r1 is not None else 0.0
+        episode.custom_metrics["dual_stagnation_steps"] = int(dual_stagnation_max)
 
+MultiAgentMetricsCallback = UnifiedMetricsCallback
+SuccessCallback = UnifiedMetricsCallback
 
 class RLTrainer:
     def __init__(
@@ -85,14 +191,16 @@ class RLTrainer:
         log_dir: str = "logs",
         log_name: str = "rl_training.log",
         num_rollout_workers: Optional[int] = None,
-        train_batch_size: int = 6000,
-        sgd_minibatch_size: int = 512,
-        lr: float = 5e-5,
+        train_batch_size: int = 8192,
+        sgd_minibatch_size: int = 256,
+        lr: float = 3e-4,
         entropy_coeff_start: float = 0.02,
         entropy_coeff_min: float = 0.005,
         entropy_decay: float = 0.995,
         curriculum_fn: Optional[Callable[[int], Dict[str, Any]]] = None,
-        checkpoint_dir: str = "checkpoints"
+        checkpoint_dir: str = "checkpoints",
+        batch_mode: str = "complete_episodes",
+        rollout_fragment_length: int = 128
     ):
         self.env_class = env_class
         self._wall_time_total = 0.0
@@ -111,6 +219,7 @@ class RLTrainer:
         self.metrics_csv_path = os.path.join(log_dir, "training_metrics.csv")
         self.metrics_jsonl_path = os.path.join(log_dir, "training_metrics.jsonl")
         self._init_metrics_files()
+        self._prev_timesteps_total: Optional[int] = None
 
         if num_rollout_workers is None:
             num_rollout_workers = 0
@@ -130,12 +239,12 @@ class RLTrainer:
                 disable_env_checking=True
             )
             .framework("torch")
-            .callbacks(MultiAgentMetricsCallback)
+            .callbacks(UnifiedMetricsCallback)
             .rollouts(
                 num_rollout_workers=num_rollout_workers,
                 num_envs_per_worker=num_envs_per_worker,
-                rollout_fragment_length=64,
-                batch_mode="truncate_episodes"
+                rollout_fragment_length=rollout_fragment_length,
+                batch_mode=batch_mode
             )
         )
 
@@ -189,11 +298,11 @@ class RLTrainer:
             gamma=0.99,
             lambda_=0.97,
             clip_param=0.2,
-            vf_clip_param=5.0,
+            vf_clip_param=2.0,
             vf_loss_coeff=1.5,
-            grad_clip=1.0,
+            grad_clip=0.5,
             sgd_minibatch_size=sgd_minibatch_size,
-            num_sgd_iter=10,
+            num_sgd_iter=15,
             train_batch_size=train_batch_size,
             kl_coeff=0.01,
             kl_target=0.02,
@@ -203,11 +312,11 @@ class RLTrainer:
         self.config: PPOConfig = cfg
         self.config.observation_filter = "NoFilter"
         self.config.clip_actions = True
-        self.config.train_batch_size = min(self.config.train_batch_size, 3072)  # cap
         self.config.compress_observations = True
         self.trainer = PPOTrainer(config=self.config)
         self.logger.info(
-            f"Initialized PPO (workers={num_rollout_workers}, train_batch={train_batch_size}, multi_agent={is_multi})"
+            f"Initialized PPO (workers={num_rollout_workers}, train_batch={self.config.train_batch_size}, "
+            f"frag_len={rollout_fragment_length}, batch_mode={batch_mode}, multi_agent={is_multi})"
         )
 
     def _get_rss_mb(self):
@@ -232,6 +341,8 @@ class RLTrainer:
             "episode_reward_min",
             "episode_reward_max",
             "success_mean",
+            "success_phase1_mean",
+            "success_qtr_mean",
             "full_success_mean",
             "phase2_started_mean",
             "nav_hits_mean_mean",
@@ -275,37 +386,50 @@ class RLTrainer:
 
     def _append_metrics(self, result: Dict[str, Any]):
         ls = self._extract_learner_stats(result)
-        cm = result.get("custom_metrics", {}) or {}
+        cms = result.get("custom_metrics", {}) or {}
+        success_rate = cms.get("success_mean", None)
+        full_success_rate = cms.get("full_success_mean", None)
 
-        def g(key):
-            return cm.get(key)
+        # Compute timesteps_this_iter if missing
+        ts_total = result.get("timesteps_total") or 0
+        if self._prev_timesteps_total is not None:
+            ts_this = ts_total - self._prev_timesteps_total
+        else:
+            ts_this = result.get("timesteps_this_iter") or 0
+        self._prev_timesteps_total = ts_total
+
+        def g(key, default=0.0):
+            val = cms.get(key)
+            return default if val is None else val
 
         row = [
-            result.get("training_iteration"),
-            result.get("timesteps_total"),
-            result.get("timesteps_this_iter"),
-            result.get("episodes_total"),
-            result.get("episodes_this_iter"),
-            result.get("episode_len_mean"),
-            result.get("episode_reward_mean"),
-            result.get("episode_reward_min"),
-            result.get("episode_reward_max"),
-            g("success_mean"),
-            g("full_success_mean"),
-            g("phase2_started_mean"),
-            g("nav_hits_mean_mean"),
-            g("nav_hits_r0_mean"),
-            g("nav_hits_r1_mean"),
-            g("dual_stagnation_steps_mean"),
-            ls.get("entropy"),
-            ls.get("policy_loss"),
-            ls.get("vf_loss"),
-            ls.get("vf_explained_var"),
-            ls.get("kl"),
-            ls.get("cur_kl_coeff"),
+            result.get("training_iteration") or 0,
+            ts_total,
+            ts_this,
+            result.get("episodes_total") or 0,
+            result.get("episodes_this_iter") or 0,
+            result.get("episode_len_mean") or 0.0,
+            result.get("episode_reward_mean") or 0.0,
+            result.get("episode_reward_min") or 0.0,
+            result.get("episode_reward_max") or 0.0,
+            g("success_mean", 0.0),
+            g("success_phase1_mean", 0.0),
+            g("success_qtr_mean", 0.0),
+            g("full_success_mean", 0.0),
+            g("phase2_started_mean", 0.0),
+            g("nav_hits_mean_mean", 0.0),
+            g("nav_hits_r0_mean", 0.0),
+            g("nav_hits_r1_mean", 0.0),
+            g("dual_stagnation_steps_mean", 0.0),
+            ls.get("entropy") or 0.0,
+            ls.get("policy_loss") or 0.0,
+            ls.get("vf_loss") or 0.0,
+            ls.get("vf_explained_var") or 0.0,
+            ls.get("kl") or 0.0,
+            ls.get("cur_kl_coeff") or 0.0,
             self.entropy_coeff,
-            self._last_iter_time_s,
-            self._wall_time_total
+            self._last_iter_time_s or 0.0,
+            self._wall_time_total or 0.0
         ]
         try:
             with open(self.metrics_csv_path, "a", newline="") as f:
@@ -348,14 +472,14 @@ class RLTrainer:
     def save_checkpoint(self) -> str:
         os.makedirs(self.checkpoint_dir, exist_ok=True)
         ckpt_path = self.trainer.save(self.checkpoint_dir)
-        if self._last_result:
-            try:
+        try:
+            if isinstance(ckpt_path, str) and self._last_result:
                 with open(os.path.join(ckpt_path, "result.json"), "w") as f:
                     json.dump(self._last_result, f, indent=2, default=str)
-            except Exception as e:
-                self.logger.warning(f"Could not write result.json: {e}")
+        except Exception as e:
+            self.logger.warning(f"Could not write result.json: {e}")
         self.logger.info(f"Checkpoint saved: {ckpt_path}")
-        return ckpt_path
+        return str(ckpt_path)
 
     def restore(self, checkpoint_path: str):
         self.trainer.restore(checkpoint_path)
@@ -366,18 +490,37 @@ class RLTrainer:
         if self.entropy_coeff > self.entropy_coeff_min:
             self.entropy_coeff = max(self.entropy_coeff_min,
                                      self.entropy_coeff * self.entropy_decay)
-            for _, policy in self.trainer.workers.local_worker().policy_map.items():
-                policy.config["entropy_coeff"] = self.entropy_coeff
+            try:
+                self.trainer.config["entropy_coeff"] = self.entropy_coeff
+            except Exception:
+                pass
+            try:
+                self.trainer.workers.foreach_policy(
+                    lambda p, pid=None: setattr(p, "entropy_coeff", self.entropy_coeff)
+                )
+            except Exception:
+                pass
+            try:
+                for _, policy in self.trainer.workers.local_worker().policy_map.items():
+                    policy.config["entropy_coeff"] = self.entropy_coeff
+            except Exception:
+                pass
 
-    def _apply_curriculum(self, local_iter: int):
+    def _apply_curriculum(self, global_iter: int):
         if not self.curriculum_fn:
             return
-        updates = self.curriculum_fn(local_iter)
+        updates = self.curriculum_fn(global_iter)
         if not updates:
             return
         def _upd(env):
+            # Support field updates and on-demand camera enabling
             for k, v in updates.items():
-                if hasattr(env, k):
+                if k == "enable_camera_capture" and v:
+                    try:
+                        env.enable_camera_capture()
+                    except Exception:
+                        pass
+                elif hasattr(env, k):
                     setattr(env, k, v)
         self.trainer.workers.foreach_env(_upd)
 
@@ -398,6 +541,10 @@ class RLTrainer:
             return self._last_result
 
         log.info(f"Starting training block: remaining_iterations={iterations} @ {datetime.now().isoformat()}")
+        try:
+            self._apply_curriculum(0)
+        except Exception:
+            pass
         iterator = trange(iterations, desc="Remaining", leave=True) if USE_TQDM and iterations > 1 else range(iterations)
 
         success_hist: List[float] = []
@@ -406,7 +553,6 @@ class RLTrainer:
         last_result = None
         for _local in iterator:
             iter_t0 = time.perf_counter()
-            self._apply_curriculum(_local)
             result = self.trainer.train()
             global_iter = result.get("training_iteration")
 
@@ -417,10 +563,14 @@ class RLTrainer:
             self._last_iter_time_s = time.perf_counter() - iter_t0
             self._wall_time_total += self._last_iter_time_s
 
-            # Use full_success_mean if present else success_mean as display
+            # Use success_mean (phase-1 aware) if present; else fallback to full_success_mean
+            cm = result.get("custom_metrics", {}) or {}
             success_rate = (
-                result.get("custom_metrics", {}).get("full_success_mean",
-                    result.get("custom_metrics", {}).get("success_mean"))
+                cm.get("success_phase1_mean")
+                if cm.get("success_phase1_mean") is not None else
+                (cm.get("success_qtr_mean")
+                 if cm.get("success_qtr_mean") is not None else
+                 (cm.get("success_mean") if cm.get("success_mean") is not None else cm.get("full_success_mean")))
             )
             success_disp = success_rate if success_rate is not None else "N/A"
 
@@ -440,6 +590,7 @@ class RLTrainer:
 
             self._decay_entropy()
             self._append_metrics(result)
+            self._apply_curriculum(global_iter)
 
             if checkpoint_every_global and (global_iter % checkpoint_every_global == 0):
                 self.save_checkpoint()
