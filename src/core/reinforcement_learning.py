@@ -147,7 +147,33 @@ class UnifiedMetricsCallback(DefaultCallbacks):
         # Success metric:
         # - If we have multi-agent progress, scale by configured totals:
         #   denom = max_total_hits (if provided) else max_hits_per_agent * num_agents
-        # - Else fallback to boolean success
+        # Fallback: read env state directly if RLlib infos were empty (still zeros)
+        if not have_multi_progress:
+            try:
+                envs = base_env.get_sub_environments() if hasattr(base_env, "get_sub_environments") else [base_env]
+                env = envs[0]
+                cc = getattr(env, "completed_counts", {})
+                nh = getattr(env, "nav_hits", {})
+                ds = int(getattr(env, "dual_stagnation_step", 0))
+                # Record as numeric metrics (not strings)
+                episode.custom_metrics["nav_hits_r0"] = float(nh.get("robot_0", 0.0))
+                episode.custom_metrics["nav_hits_r1"] = float(nh.get("robot_1", 0.0))
+                episode.custom_metrics["nav_hits_mean"] = float(np.mean(list(nh.values()))) if nh else 0.0
+                episode.custom_metrics["dual_stagnation_steps"] = ds
+
+                total_hits = int(sum(max(0, int(v)) for v in cc.values())) if isinstance(cc, dict) else 0
+                num_agents = max(1, len(cc)) if isinstance(cc, dict) else max(1, len(episode.agent_rewards) or [0])
+                # success over full 2-phase (denom = 2 hits per agent)
+                episode.custom_metrics["success_qtr"] = float(np.clip(total_hits / float(2 * num_agents), 0.0, 1.0))
+                # phase-1 success (denom = 1 hit per agent)
+                episode.custom_metrics["success_phase1"] = float(np.clip(total_hits / float(num_agents), 0.0, 1.0))
+                # coarse success (any hit)
+                episode.custom_metrics["success"] = 1.0 if total_hits > 0 else 0.0
+                episode.custom_metrics["full_success"] = 1.0 if total_hits >= (2 * num_agents) else 0.0
+            except Exception:
+                # keep metrics at 0 if env fields are missing
+                pass
+
         if have_multi_progress:
             denom = max_total_hits if (isinstance(max_total_hits, int) and max_total_hits > 0) \
                     else (max_hits_per_agent * max(1, len(agent_ids)))
@@ -302,7 +328,7 @@ class RLTrainer:
             vf_loss_coeff=1.5,
             grad_clip=0.5,
             sgd_minibatch_size=sgd_minibatch_size,
-            num_sgd_iter=15,
+            num_sgd_iter=10,
             train_batch_size=train_batch_size,
             kl_coeff=0.01,
             kl_target=0.02,
@@ -329,7 +355,6 @@ class RLTrainer:
     # ---------- Metrics ----------
     @property
     def _csv_header(self) -> List[str]:
-        # Extended header (add new metrics at the end but before time fields for clarity)
         return [
             "training_iteration",
             "timesteps_total",
@@ -382,7 +407,14 @@ class RLTrainer:
                 csv.writer(f).writerow(self._csv_header)
 
     def _extract_learner_stats(self, result: Dict[str, Any]) -> Dict[str, Any]:
-        return result.get("info", {}).get("learner", {}).get("default_policy", {}).get("learner_stats", {}) or {}
+        learner = result.get("info", {}).get("learner", {}) or {}
+        for key in ["shared_policy", "default_policy"]:
+            if key in learner:
+                return learner[key].get("learner_stats", {}) or {}
+        if learner:
+            first = next(iter(learner.values()))
+            return first.get("learner_stats", {}) or {}
+        return {}
 
     def _append_metrics(self, result: Dict[str, Any]):
         ls = self._extract_learner_stats(result)
@@ -528,7 +560,7 @@ class RLTrainer:
     def train(
         self,
         iterations: int = 1,
-        checkpoint_every_global: int = 10,
+        checkpoint_every_global: int = 40,
         batch_log: int = 10
     ):
         """

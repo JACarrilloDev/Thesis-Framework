@@ -684,6 +684,7 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         )
         if early_stagnant_done:
             print(f"[Ep {self.episode_index} Step {self.current_step}] Early termination: dual stagnation trigger.")
+        self.dual_stagnation_steps = self._dual_stagnation_counter            
 
         # Collision
         if self._collision():
@@ -739,11 +740,14 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             print(f"[Ep {self.episode_index} Step {self.current_step}] " + " | ".join(parts))
 
         full_success = all(self.completed_counts[a] == 2 for a in AGENTS)
+        # RLlib requires: infos keys must be a subset of obs keys
+        # Emit per-agent infos only for active_ids
+        info_keys = active_ids
         infos = {
             aid: {
                 "nav_hits": self.nav_hits[aid],
                 "completed": self.completed_counts[aid],
-                "dual_stagnation_steps": self._dual_stagnation_counter,
+                "dual_stagnation_steps": self.dual_stagnation_steps,
                 "early_stagnation": early_stagnant_done,
                 "start_dummy": self.start_dummy_chosen.get(aid, ""),
                 "phase2_started": self.second_phase_chosen,
@@ -751,9 +755,23 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
                 "max_hits_per_agent": self.max_hits_per_agent if hasattr(self, "max_hits_per_agent") else 2,
                 "max_total_hits": self.max_total_hits if hasattr(self, "max_total_hits") else None,
                 "num_agents": len(AGENTS),
-            } for aid in active_ids
+            } for aid in info_keys
         }
-        if episode_end and active_ids:
-            infos[active_ids[0]]["success"] = full_success
+        if episode_end:
+            for aid in info_keys:
+                infos[aid]["success"] = full_success
+            # Optional aggregate summary for callbacks (safe: won't violate key subset rule)
+            infos["__common__"] = {
+                "full_success": full_success,
+                "phase2_started": self.second_phase_chosen,
+                "dual_stagnation_steps": self.dual_stagnation_steps,
+                "early_stagnation": early_stagnant_done,
+                "max_hits_per_agent": self.max_hits_per_agent if hasattr(self, "max_hits_per_agent") else 2,
+                "max_total_hits": self.max_total_hits if hasattr(self, "max_total_hits") else None,
+                "num_agents": len(AGENTS),
+                # Use distinct names to avoid on_episode_step int-casting of per-agent fields
+                "completed_map": {aid: self.completed_counts[aid] for aid in AGENTS},
+                "nav_hits_map": {aid: self.nav_hits[aid] for aid in AGENTS},
+            }
 
         return obs, rewards, terminateds, truncateds, infos
