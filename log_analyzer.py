@@ -83,7 +83,6 @@ def _safe_div(a: pd.Series, b: pd.Series) -> pd.Series:
 
 def load_csv(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
-    # Coerce known numeric columns
     for col in CSV_HEADER:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -98,7 +97,6 @@ def ensure_columns(df: pd.DataFrame) -> pd.DataFrame:
     df["reward_range"] = df["episode_reward_max"] - df["episode_reward_min"]
     df["throughput_ts_per_s"] = _safe_div(df["timesteps_this_iter"], df["iter_time_s"])
     df["steps_per_episode_est"] = _safe_div(df["timesteps_this_iter"], df["episodes_this_iter"])
-    # Combine nav hits if present (skip when ignoring)
     if not IGNORE_SUCCESS_HITS:
         hits_cols = [c for c in ["nav_hits_mean_mean", "nav_hits_r0_mean", "nav_hits_r1_mean"] if c in df.columns]
         if hits_cols:
@@ -650,7 +648,7 @@ def main():
     ap.add_argument("--outdir", default="logs/analysis", help="Output directory for analysis")
     ap.add_argument("--split-runs", action="store_true", help="Split concatenated logs into runs when counters reset")
     ap.add_argument("--run-index", type=int, default=None, help="Which run to analyze (0-based, -1 = last). Omit to analyze all.")
-    ap.add_argument("--curriculum-boundaries", type=str, default=None, help="Comma-separated iteration boundaries to annotate (e.g. '400,900').")
+    ap.add_argument("--curriculum-boundaries", type=str, default=None, help="Comma-separated iteration boundaries to annotate.")
     ap.add_argument("--ignore-success-hits", action="store_true", help="If set, ignore success and navigation hits in the analysis.")
     ap.add_argument("--clean-outdir", action="store_true", help="Delete logs/analysis/run_{rid} before writing new outputs")    
     args = ap.parse_args()

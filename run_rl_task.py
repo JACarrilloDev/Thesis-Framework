@@ -174,7 +174,6 @@ def main():
 
     curriculum_fn = None
     if args.use_default_curriculum:
-        # 3-stage plan across GLOBAL PPO iterations (with optional offset)
         def default_curriculum(global_iter: int):
             g = max(0, int(global_iter) - int(args.curriculum_offset))
             # Stage A (0-45): easier success, obstacle hidden
@@ -185,21 +184,21 @@ def main():
                     "obstacle_prob": 0.0,
                     "dual_stagnation_limit": 240,
                 }
-            # Stage B (75-135): tighten and reintroduce obstacle
+            # Stage B (45-75): tighten and reintroduce obstacle
             if g < 75:
                 return {
-                    "success_dist": 0.8,
+                    "success_dist": 1.4,
                     "enable_obstacle_cfg": True,
                     "obstacle_prob": 0.5,
                     "dual_stagnation_limit": 200
                 }
-            # Stage C (135-200): tighten and reintroduce obstacle
+            # Stage C (75-135): tighten and reintroduce obstacle
             if g < 135:
                 return {
                     "success_dist": 0.8,
                     "enable_obstacle_cfg": True,
-                    "obstacle_prob": 0.5,
-                    "dual_stagnation_limit": 200
+                    "obstacle_prob": 0.75,
+                    "dual_stagnation_limit": 140
                 }
             # Stage D (135+): longest horizon
             return {

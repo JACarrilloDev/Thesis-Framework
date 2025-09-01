@@ -489,3 +489,5 @@
 2025-08-31 13:59:20,241 - RLTrainerLogger - INFO - Iter 204 reward_mean=762.47 succ=0.00 r_min=-129.74 r_max=2351.65 ep_len=604.65 ts_total=1318838 kl=0.02 kl_coeff=0.65 pol_loss=0.02 vf_loss=1.58 vf_ev=0.96 entropy=14.04 entropy_coeff=0.01
 2025-08-31 14:02:17,052 - RLTrainerLogger - INFO - [Memory] Iter 205 RSS_MB=1234.9
 2025-08-31 14:02:17,052 - RLTrainerLogger - INFO - Iter 205 reward_mean=782.72 succ=0.00 r_min=-129.74 r_max=2351.65 ep_len=604.45 ts_total=1325578 kl=0.02 kl_coeff=0.65 pol_loss=0.01 vf_loss=1.65 vf_ev=0.96 entropy=15.60 entropy_coeff=0.01
+2025-08-31 21:08:52,072 - RLTrainerLogger - INFO - Initialized PPO (workers=0, train_batch=6144, frag_len=256, batch_mode=complete_episodes, multi_agent=True)
+2025-08-31 21:08:52,079 - RLTrainerLogger - INFO - Starting training block: remaining_iterations=300 @ 2025-08-31T21:08:52.079010

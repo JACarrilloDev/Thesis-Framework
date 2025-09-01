@@ -22,3 +22,9 @@
 2025-08-31 04:35:44,659 - robot_controller_logger - INFO - RobotController for 'AstiPioneer1' components initialized.
 2025-08-31 04:35:44,660 - robot_controller_logger - INFO - Initializing RobotController for: AstiPioneer2
 2025-08-31 04:35:44,660 - robot_controller_logger - INFO - RobotController for 'AstiPioneer2' components initialized.
+2025-08-31 21:08:44,948 - robot_controller_logger - INFO - Initializing RobotController for: AstiPioneer1
+2025-08-31 21:08:44,949 - robot_controller_logger - INFO - VisionSensor 'Vision_sensor1' (key: front_camera) initialized.
+2025-08-31 21:08:44,950 - robot_controller_logger - INFO - RobotController for 'AstiPioneer1' components initialized.
+2025-08-31 21:08:44,950 - robot_controller_logger - INFO - Initializing RobotController for: AstiPioneer2
+2025-08-31 21:08:44,950 - robot_controller_logger - INFO - VisionSensor 'Vision_sensor2' (key: front_camera) initialized.
+2025-08-31 21:08:44,950 - robot_controller_logger - INFO - RobotController for 'AstiPioneer2' components initialized.
