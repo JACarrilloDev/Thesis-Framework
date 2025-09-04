@@ -10,4 +10,5 @@ imageio
 tqdm
 onnx
 onnxruntime
+onnxscript
 pandas
