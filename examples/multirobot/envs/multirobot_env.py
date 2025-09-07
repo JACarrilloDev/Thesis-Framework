@@ -471,18 +471,16 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             prev = self.prev_dist[aid]
             if prev is not None:
                 delta = prev - dist_cur
-                made_progress = delta > self.stuck_delta
+                made_progress = (delta > self.stuck_delta)
                 if made_progress:
-                    # Progress shaping + potential-based term
                     reward += np.clip(delta, -0.5, 0.5) * self.w_progress
-                    phi_prev = -self.progress_alpha * prev
-                    phi_cur  = -self.progress_alpha * dist_cur
-                    reward += self.shaping_gamma * phi_cur - phi_prev
+                    self.no_progress_steps[aid] = 0
                 else:
-                    # Backtracking penalty if moving away
-                    if delta < -0.02:
-                        reward += self.w_backtrack * (-delta)
                     self.no_progress_steps[aid] += 1
+                    # Small backtrack penalty if moving away
+                    if delta < -self.stuck_delta:
+                        reward += self.w_backtrack * min(1.0, abs(delta))
+                    self.prev_dist[aid] = dist_cur
                     if (self.no_progress_steps[aid] % 25 == 0) and self.verbose:
                         print(f"[Ep {self.episode_index} Step {self.current_step}] {aid} no-progress counter={self.no_progress_steps[aid]} delta={(prev - dist_cur):.4f}")
                     if self.no_progress_steps[aid] >= self.no_progress_threshold:
@@ -504,16 +502,13 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         # Reverse penalty
         if vx < -0.05:
             reward += self.w_reverse * abs(vx)
-        # Forward speed shaping (prefer forward when safe)
         # Proximity wall penalty (front arc sensors only)
         if len(self._front_prox_idx) > 0:
             front_vals = [prox[i] for i in self._front_prox_idx if i < len(prox)]
             if front_vals:
                 min_front = float(np.min(front_vals))
-                # penalize getting too close to walls/objects
                 if min_front < 0.30:
                     reward += self.w_prox_wall * (0.30 - min_front)
-                # discourage fast forward when obstacle is near
                 if min_front < 0.20 and vx > 0.10:
                     reward += -2.0 * vx
         # Slight reward for smooth forward motion otherwise
@@ -644,6 +639,7 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
 
         vect_obs_cache = {aid: self._build_vect_obs(aid) for aid in active_ids}
         rewards = {}
+        hit_agents_this_step: List[str] = []
         for aid in active_ids:
             vect = vect_obs_cache[aid]
             dist_cur = vect[11]
@@ -652,13 +648,18 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
             cur_idx = self._current_target_idx(aid)
             if cur_idx is not None and dist_cur < self.success_dist:
                 if self.target_completed_by[cur_idx] is None:
+                    # Print HIT
+                    phase_label = "PHASE-1" if self.completed_counts[aid] == 0 else "PHASE-2"
+                    tgt_name = self.target_names[cur_idx] if 0 <= cur_idx < len(self.target_names) else f"idx{cur_idx}"
+                    print(f"[Ep {self.episode_index} Step {self.current_step}] HIT: {aid} -> {tgt_name} ({phase_label}) "
+                          f"dist={dist_cur:.2f} <= thr={self.success_dist:.2f}")
+                    hit_agents_this_step.append(aid)
+
                     rewards[aid] += self.w_completion
                     self.target_completed_by[cur_idx] = aid
                     self.target_completion_step[cur_idx] = self.current_step
                     self.nav_hits[aid] += 1
                     self.completed_counts[aid] += 1
-                    print(f"[Ep {self.episode_index} Step {self.current_step}] {aid} HIT target {self.target_names[cur_idx]} (hits={self.nav_hits[aid]})")
-
                     if self.completed_counts[aid] == 1:
                         if not self.second_phase_chosen:
                             self._decide_second_phase(aid, self._remaining_after_initial)
@@ -667,11 +668,11 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
                             self._teleport_nav_target(aid, nxt_idx)
                             self.prev_dist[aid] = None
                             self.no_progress_steps[aid] = 0
-                    elif self.completed_counts[aid] == 2:
-                        self.nav_current_indices[aid] = None
-                        self.prev_dist[aid] = None
-                        self.no_progress_steps[aid] = 0
-                        rewards[aid] += self.w_final_bonus
+
+        # If both robots hit this step, log it
+        if len(hit_agents_this_step) >= 2:
+            print(f"[Ep {self.episode_index} Step {self.current_step}] BOTH robots hit in the same step: "
+                  f"{', '.join(sorted(hit_agents_this_step))}")
 
         # Stagnation (after progress flags updated)
         if not any(self._made_progress_flags.values()):
@@ -684,12 +685,12 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         )
         if early_stagnant_done:
             print(f"[Ep {self.episode_index} Step {self.current_step}] Early termination: dual stagnation trigger.")
-        self.dual_stagnation_steps = self._dual_stagnation_counter            
+        self.dual_stagnation_steps = self._dual_stagnation_counter          
 
         # Collision
         if self._collision():
             for aid in active_ids:
-                rewards[aid] += self.w_collision
+                rewards[aid] = rewards.get(aid, 0.0) + self.w_collision
             # if self.verbose:
             print(f"[Ep {self.episode_index} Step {self.current_step}] Collision penalized.")
 
@@ -727,8 +728,7 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         # Update alive set for next step
         for aid in active_ids:
             if terminateds.get(aid, False) or truncateds.get(aid, False):
-                if aid in self._alive_agents:
-                    self._alive_agents.remove(aid)
+                self._alive_agents.discard(aid)
 
         episode_end = terminateds["__all__"] or truncateds["__all__"]
 
@@ -760,7 +760,6 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
         if episode_end:
             for aid in info_keys:
                 infos[aid]["success"] = full_success
-            # Optional aggregate summary for callbacks (safe: won't violate key subset rule)
             infos["__common__"] = {
                 "full_success": full_success,
                 "phase2_started": self.second_phase_chosen,
@@ -769,9 +768,7 @@ class DynamicTwoPhaseNavEnv(MultiAgentEnv):
                 "max_hits_per_agent": self.max_hits_per_agent if hasattr(self, "max_hits_per_agent") else 2,
                 "max_total_hits": self.max_total_hits if hasattr(self, "max_total_hits") else None,
                 "num_agents": len(AGENTS),
-                # Use distinct names to avoid on_episode_step int-casting of per-agent fields
                 "completed_map": {aid: self.completed_counts[aid] for aid in AGENTS},
                 "nav_hits_map": {aid: self.nav_hits[aid] for aid in AGENTS},
             }
-
         return obs, rewards, terminateds, truncateds, infos

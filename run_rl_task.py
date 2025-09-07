@@ -177,15 +177,15 @@ def main():
         def default_curriculum(global_iter: int):
             g = max(0, int(global_iter) - int(args.curriculum_offset))
             # Stage A (0-45): easier success, obstacle hidden
-            if g < 45:
+            if g < 100:
                 return {
-                    "success_dist": 2.0,
+                    "success_dist": 1.8,
                     "enable_obstacle_cfg": True,
                     "obstacle_prob": 0.0,
                     "dual_stagnation_limit": 240,
                 }
             # Stage B (45-75): tighten and reintroduce obstacle
-            if g < 75:
+            if g < 150:
                 return {
                     "success_dist": 1.4,
                     "enable_obstacle_cfg": True,
@@ -193,11 +193,11 @@ def main():
                     "dual_stagnation_limit": 200
                 }
             # Stage C (75-135): tighten and reintroduce obstacle
-            if g < 135:
+            if g < 250:
                 return {
-                    "success_dist": 0.8,
+                    "success_dist": 1.2,
                     "enable_obstacle_cfg": True,
-                    "obstacle_prob": 0.75,
+                    "obstacle_prob": 0.8,
                     "dual_stagnation_limit": 140
                 }
             # Stage D (135+): longest horizon

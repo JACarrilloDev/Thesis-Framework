@@ -36,7 +36,7 @@ try:
 except Exception:
     HAS_PLT = False
 
-IGNORE_SUCCESS_HITS = False
+IGNORE_SUCCESS_HITS = True
 
 CSV_HEADER = [
     # Keep in sync with RLTrainer._csv_header
@@ -645,16 +645,27 @@ def main():
     ap.add_argument("--window", type=int, default=25, help="Rolling window size")
     ap.add_argument("--tail-n", type=int, default=200, help="Tail window used in summaries")
     ap.add_argument("--no-plots", action="store_true", help="Disable plotting")
-    ap.add_argument("--outdir", default="logs/analysis", help="Output directory for analysis")
     ap.add_argument("--split-runs", action="store_true", help="Split concatenated logs into runs when counters reset")
     ap.add_argument("--run-index", type=int, default=None, help="Which run to analyze (0-based, -1 = last). Omit to analyze all.")
     ap.add_argument("--curriculum-boundaries", type=str, default=None, help="Comma-separated iteration boundaries to annotate.")
+    ap.add_argument("--outdir", default=None, help="Output directory (default: <dirname(--csv)>/analysis)")
     ap.add_argument("--ignore-success-hits", action="store_true", help="If set, ignore success and navigation hits in the analysis.")
     ap.add_argument("--clean-outdir", action="store_true", help="Delete logs/analysis/run_{rid} before writing new outputs")    
     args = ap.parse_args()
 
     if not os.path.exists(args.csv):
         raise SystemExit(f"CSV not found: {args.csv}")
+
+    # Default outdir next to the CSV if not provided
+    if not args.outdir:
+        csv_dir = os.path.dirname(os.path.abspath(args.csv)) or "."
+        args.outdir = os.path.join(csv_dir, "analysis")
+
+    # If JSONL pattern not provided, default to sibling file next to CSV when present
+    if not args.jsonl_pattern:
+        candidate_jsonl = os.path.join(os.path.dirname(os.path.abspath(args.csv)), "training_metrics.jsonl")
+        if os.path.exists(candidate_jsonl):
+            args.jsonl_pattern = candidate_jsonl
 
     bak_path = args.bak if (args.merge_bak and args.bak and os.path.exists(args.bak)) else None
     df = merge_runs(args.csv, bak_path)
@@ -671,7 +682,7 @@ def main():
         df["run_id"] = 0
 
     global IGNORE_SUCCESS_HITS
-    IGNORE_SUCCESS_HITS = bool(args.ignore_success_hits)
+    IGNORE_SUCCESS_HITS = bool(not args.ignore_success_hits)
 
     boundaries = None
     if args.curriculum_boundaries:

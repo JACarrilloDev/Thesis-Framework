@@ -1,0 +1,7 @@
+2025-08-31 02:31:25,112 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-31 02:33:54,962 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-31 03:32:40,319 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-31 04:31:43,347 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-31 04:35:03,731 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-31 04:35:43,845 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True
+2025-08-31 21:08:35,934 - generic_rl - INFO - Launching training env_class=examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv multi_agent=True

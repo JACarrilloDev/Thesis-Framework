@@ -69,9 +69,12 @@ class UnifiedMetricsCallback(DefaultCallbacks):
             infos = getattr(episode, "_agent_to_last_info", {}) or {}
         # Fallback single-agent
         if not infos:
-            single = episode.last_info_for()
-            if single:
-                infos = {"agent_0": single}
+            try:
+                single = episode.last_info_for()
+                if single:
+                    infos = {"agent_0": single}
+            except Exception:
+                infos = {}
 
         # Accumulators
         any_success = False
@@ -90,13 +93,11 @@ class UnifiedMetricsCallback(DefaultCallbacks):
         agent_ids = list(episode.get_agents()) if hasattr(episode, "get_agents") else list(infos.keys())
 
         # Pass 1: read per-agent infos
-        for aid, inf in infos.items():
+        for aid, inf in (infos.items() if isinstance(infos, dict) else []):
             if not isinstance(inf, dict):
                 continue
-            # Single-agent success
             if inf.get("success"):
                 any_success = True
-            # Multi-agent fields
             if inf.get("full_success"):
                 full_success = True
                 any_success = True
@@ -104,11 +105,15 @@ class UnifiedMetricsCallback(DefaultCallbacks):
                 phase2_started = True
             dual_stagnation_max = max(dual_stagnation_max, int(inf.get("dual_stagnation_steps", 0)))
             if "nav_hits" in inf:
-                nav_hits_vals.append(float(inf["nav_hits"]))
-                if aid == "robot_0":
-                    nav_hits_r0 = inf["nav_hits"]
-                if aid == "robot_1":
-                    nav_hits_r1 = inf["nav_hits"]
+                try:
+                    v = float(inf["nav_hits"])
+                    nav_hits_vals.append(v)
+                    if aid == "robot_0":
+                        nav_hits_r0 = inf["nav_hits"]
+                    elif aid == "robot_1":
+                        nav_hits_r1 = inf["nav_hits"]
+                except Exception:
+                    pass
             if "completed" in inf:
                 have_multi_progress = True
                 try:
@@ -116,7 +121,6 @@ class UnifiedMetricsCallback(DefaultCallbacks):
                 except Exception:
                     c = 0
                 total_completed_hits += max(0, min(c, max_hits_per_agent))
-            # Phase-1 scaling hints (optional from env)
             if "max_hits_per_agent" in inf:
                 try:
                     max_hits_per_agent = int(inf["max_hits_per_agent"])
@@ -129,82 +133,174 @@ class UnifiedMetricsCallback(DefaultCallbacks):
                     pass
 
         # Pass 2: merge accumulated per-step user_data
-        if "completed" in ud:
-            have_multi_progress = True
-            for c in ud["completed"].values():
-                total_completed_hits += max(0, min(int(c), max_hits_per_agent))
-        if "nav_hits" in ud:
-            vals = list(ud["nav_hits"].values())
-            if vals:
-                nav_hits_vals.append(float(np.mean(vals)))
-            nav_hits_r0 = ud["nav_hits"].get("robot_0", nav_hits_r0)
-            nav_hits_r1 = ud["nav_hits"].get("robot_1", nav_hits_r1)
-        dual_stagnation_max = max(dual_stagnation_max, int(ud.get("dual_stagnation_max", 0)))
-        phase2_started = phase2_started or bool(ud.get("phase2_started"))
-        full_success = full_success or bool(ud.get("full_success"))
-        any_success = any_success or bool(ud.get("any_success"))
+        if isinstance(ud, dict):
+            if "completed" in ud:
+                have_multi_progress = True
+                for c in ud["completed"].values():
+                    try:
+                        total_completed_hits += max(0, min(int(c), max_hits_per_agent))
+                    except Exception:
+                        pass
+            if "nav_hits" in ud:
+                vals = list(ud["nav_hits"].values())
+                if vals:
+                    try:
+                        nav_hits_vals.append(float(np.mean(vals)))
+                    except Exception:
+                        pass
+                nav_hits_r0 = ud["nav_hits"].get("robot_0", nav_hits_r0)
+                nav_hits_r1 = ud["nav_hits"].get("robot_1", nav_hits_r1)
+            dual_stagnation_max = max(dual_stagnation_max, int(ud.get("dual_stagnation_max", 0)))
+            phase2_started = phase2_started or bool(ud.get("phase2_started"))
+            full_success = full_success or bool(ud.get("full_success"))
+            any_success = any_success or bool(ud.get("any_success"))
 
-        # Success metric:
-        # - If we have multi-agent progress, scale by configured totals:
-        #   denom = max_total_hits (if provided) else max_hits_per_agent * num_agents
-        # Fallback: read env state directly if RLlib infos were empty (still zeros)
-        if not have_multi_progress:
+        # Env merge (NEVER drop env data)
+        env0 = None
+        try:
+            envs = base_env.get_sub_environments() if hasattr(base_env, "get_sub_environments") else [base_env]
+            env0 = envs[0]
+        except Exception:
+            env0 = None
+
+        if env0 is not None:
+            cc_env = dict(getattr(env0, "completed_counts", {}) or {})
+            nh_env = dict(getattr(env0, "nav_hits", {}) or {})
+            ds_env = int(getattr(env0, "dual_stagnation_steps", 0))
+            phase2_env = bool(getattr(env0, "second_phase_chosen", False))
+
+            # Limits from env if present
             try:
-                envs = base_env.get_sub_environments() if hasattr(base_env, "get_sub_environments") else [base_env]
-                env = envs[0]
-                cc = getattr(env, "completed_counts", {})
-                nh = getattr(env, "nav_hits", {})
-                ds = int(getattr(env, "dual_stagnation_step", 0))
-                # Record as numeric metrics (not strings)
-                episode.custom_metrics["nav_hits_r0"] = float(nh.get("robot_0", 0.0))
-                episode.custom_metrics["nav_hits_r1"] = float(nh.get("robot_1", 0.0))
-                episode.custom_metrics["nav_hits_mean"] = float(np.mean(list(nh.values()))) if nh else 0.0
-                episode.custom_metrics["dual_stagnation_steps"] = ds
-
-                total_hits = int(sum(max(0, int(v)) for v in cc.values())) if isinstance(cc, dict) else 0
-                num_agents = max(1, len(cc)) if isinstance(cc, dict) else max(1, len(episode.agent_rewards) or [0])
-                # success over full 2-phase (denom = 2 hits per agent)
-                episode.custom_metrics["success_qtr"] = float(np.clip(total_hits / float(2 * num_agents), 0.0, 1.0))
-                # phase-1 success (denom = 1 hit per agent)
-                episode.custom_metrics["success_phase1"] = float(np.clip(total_hits / float(num_agents), 0.0, 1.0))
-                # coarse success (any hit)
-                episode.custom_metrics["success"] = 1.0 if total_hits > 0 else 0.0
-                episode.custom_metrics["full_success"] = 1.0 if total_hits >= (2 * num_agents) else 0.0
+                mhp_env = getattr(env0, "max_hits_per_agent", None)
+                if mhp_env is not None:
+                    max_hits_per_agent = int(mhp_env)
             except Exception:
-                # keep metrics at 0 if env fields are missing
+                pass
+            try:
+                mth_env = getattr(env0, "max_total_hits", None)
+                if mth_env is not None:
+                    max_total_hits = int(mth_env)
+            except Exception:
                 pass
 
+            dual_stagnation_max = max(dual_stagnation_max, ds_env)
+            phase2_started = phase2_started or phase2_env
+            if nav_hits_r0 is None:
+                nav_hits_r0 = nh_env.get("robot_0", None)
+            if nav_hits_r1 is None:
+                nav_hits_r1 = nh_env.get("robot_1", None)
+
+            # Always merge env completed counts using max (avoid zero-overwrites)
+            try:
+                env_completed = int(sum(max(0, int(v)) for v in cc_env.values())) if cc_env else 0
+            except Exception:
+                env_completed = 0
+            if env_completed > total_completed_hits:
+                total_completed_hits = env_completed
+            have_multi_progress = have_multi_progress or (env_completed > 0)
+
+        # Resolve final values
+        nh_vals_final: List[float] = []
+        for v in nav_hits_vals:
+            try:
+                nh_vals_final.append(float(v))
+            except Exception:
+                pass
+        if not nh_vals_final:
+            for v in [nav_hits_r0, nav_hits_r1]:
+                if v is not None:
+                    try:
+                        nh_vals_final.append(float(v))
+                    except Exception:
+                        pass
+        nav_hits_mean_final = float(np.mean(nh_vals_final)) if nh_vals_final else 0.0
+        nav_hits_r0_final = float(nav_hits_r0) if nav_hits_r0 is not None else 0.0
+        nav_hits_r1_final = float(nav_hits_r1) if nav_hits_r1 is not None else 0.0
+
+        # Success metrics
+        num_agents = max(1, len(agent_ids)) if agent_ids else 2
         if have_multi_progress:
             denom = max_total_hits if (isinstance(max_total_hits, int) and max_total_hits > 0) \
-                    else (max_hits_per_agent * max(1, len(agent_ids)))
+                    else (max_hits_per_agent * num_agents)
             success_val = (float(total_completed_hits) / float(denom)) if denom > 0 else 0.0
-            episode.custom_metrics["success"] = float(np.clip(success_val, 0.0, 1.0))
-        else:
-            episode.custom_metrics["success"] = 1.0 if any_success else 0.0
-
-        # Additional, explicit phase-1 metrics:
-        # - success_phase1: scale by 2 (2 robots x 1 phase) -> shows 0.5 when only one robot hits.
-        # - success_qtr: scale by 4 (2 robots x 2 phases) -> shows 0.25/0.5 style even if episode ends early.
-        denom_phase1 = max(1, len(agent_ids))       # 2 robots -> 2
-        denom_phase2 = 2 * denom_phase1              # 2 robots * 2 phases
-        if have_multi_progress:
-            episode.custom_metrics["success_phase1"] = float(
-                np.clip((float(total_completed_hits) / float(denom_phase1)), 0.0, 1.0)
-            )
-            episode.custom_metrics["success_qtr"] = float(
-                np.clip((float(total_completed_hits) / float(denom_phase2)), 0.0, 1.0)
-            )
+            success_val = float(np.clip(success_val, 0.0, 1.0))
+            episode.custom_metrics["success"] = success_val
+            episode.custom_metrics["success_phase1"] = float(np.clip(total_completed_hits / float(num_agents), 0.0, 1.0))
+            episode.custom_metrics["success_qtr"] = float(np.clip(total_completed_hits / float(2 * num_agents), 0.0, 1.0))
         else:
             base = 1.0 if any_success else 0.0
+            episode.custom_metrics["success"] = base
             episode.custom_metrics["success_phase1"] = base
             episode.custom_metrics["success_qtr"] = base
 
         episode.custom_metrics["full_success"] = 1.0 if full_success else 0.0
         episode.custom_metrics["phase2_started"] = 1.0 if phase2_started else 0.0
-        episode.custom_metrics["nav_hits_mean"] = float(np.mean(nav_hits_vals)) if nav_hits_vals else 0.0
-        episode.custom_metrics["nav_hits_r0"] = float(nav_hits_r0) if nav_hits_r0 is not None else 0.0
-        episode.custom_metrics["nav_hits_r1"] = float(nav_hits_r1) if nav_hits_r1 is not None else 0.0
+        episode.custom_metrics["nav_hits_mean"] = nav_hits_mean_final
+        episode.custom_metrics["nav_hits_r0"] = nav_hits_r0_final
+        episode.custom_metrics["nav_hits_r1"] = nav_hits_r1_final
         episode.custom_metrics["dual_stagnation_steps"] = int(dual_stagnation_max)
+
+        # Also record into hist_data so RLlib exposes arrays in result['hist_stats']
+        try:
+            hd = episode.hist_data
+        except Exception:
+            hd = None
+        if isinstance(hd, dict):
+            for k in ("success", "success_phase1", "success_qtr",
+                      "full_success", "phase2_started",
+                      "nav_hits_mean", "nav_hits_r0", "nav_hits_r1",
+                      "dual_stagnation_steps"):
+                try:
+                    hd.setdefault(k, []).append(float(episode.custom_metrics[k]))
+                except Exception:
+                    pass
+
+        # Optional debug
+        try:
+            envs = base_env.get_sub_environments() if hasattr(base_env, "get_sub_environments") else [base_env]
+            env0 = envs[0]
+        except Exception:
+            env0 = None
+        if env0 is not None and getattr(env0, "debug_metrics", False):
+            if (episode.custom_metrics["nav_hits_r0"] > 0.0 or
+                episode.custom_metrics["nav_hits_r1"] > 0.0 or
+                episode.custom_metrics["success_phase1"] > 0.0):
+                print(f"[MetricsDBG] ep_end "
+                      f"hits_r0={episode.custom_metrics['nav_hits_r0']} "
+                      f"hits_r1={episode.custom_metrics['nav_hits_r1']} "
+                      f"hits_mean={episode.custom_metrics['nav_hits_mean']} "
+                      f"completed_total={int(total_completed_hits)} "
+                      f"s_phase1={episode.custom_metrics['success_phase1']}")
+
+    # NEW: Backfill missing *_mean entries from hist_stats (also override zeros if hist > 0)
+    def on_train_result(self, *, algorithm, result: Dict[str, Any], **kwargs):
+        cms = result.setdefault("custom_metrics", {}) or {}
+        hs = result.get("hist_stats", {}) or {}
+
+        def _arr(name: str):
+            # Try several common keys RLlib may use for hist arrays
+            return (hs.get(name)
+                    or hs.get(f"custom_metrics/{name}")
+                    or hs.get(f"{name}_hist")
+                    or hs.get(f"custom_metrics/{name}_hist"))
+
+        def _mean_backfill(name: str):
+            key = f"{name}_mean"
+            arr = _arr(name)
+            if isinstance(arr, (list, tuple)) and len(arr) > 0:
+                try:
+                    arr_mean = float(np.mean(arr))
+                except Exception:
+                    arr_mean = None
+                # Fill if missing, or replace 0.0 with positive hist mean
+                if cms.get(key) is None or (cms.get(key) == 0.0 and arr_mean and arr_mean > 0.0):
+                    cms[key] = arr_mean
+
+        for base in ("success", "success_phase1", "success_qtr",
+                     "full_success", "phase2_started",
+                     "nav_hits_mean", "nav_hits_r0", "nav_hits_r1",
+                     "dual_stagnation_steps"):
+            _mean_backfill(base)
 
 MultiAgentMetricsCallback = UnifiedMetricsCallback
 SuccessCallback = UnifiedMetricsCallback
@@ -339,6 +435,10 @@ class RLTrainer:
         self.config.observation_filter = "NoFilter"
         self.config.clip_actions = True
         self.config.compress_observations = True
+        try:
+            self.config.keep_per_episode_custom_metrics = True 
+        except Exception:
+            pass
         self.trainer = PPOTrainer(config=self.config)
         self.logger.info(
             f"Initialized PPO (workers={num_rollout_workers}, train_batch={self.config.train_batch_size}, "
@@ -560,7 +660,7 @@ class RLTrainer:
     def train(
         self,
         iterations: int = 1,
-        checkpoint_every_global: int = 40,
+        checkpoint_every_global: int = 50,
         batch_log: int = 10
     ):
         """
