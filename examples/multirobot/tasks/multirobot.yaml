@@ -3,7 +3,7 @@ env_class: examples.multirobot.envs.multirobot_env.DynamicTwoPhaseNavEnv
 multi_agent: true
 
 use_camera: true
-defer_camera: true
+defer_camera: false
 camera_key: front_camera
 camera_size: [64,64]
 camera_grayscale: true
@@ -12,7 +12,7 @@ max_episode_steps: 650
 success_dist: 1.0
 collision_dist: 0.30
 verbose: false
-log_every_steps: 100
+log_every_steps: 50
 dual_stagnation_limit: 240
 enable_dual_stagnation_terminate: true
 
